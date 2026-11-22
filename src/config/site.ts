@@ -82,6 +82,7 @@ const deliveredRoutes: ReadonlySet<RouteKey> = new Set<RouteKey>([
   "livraison",
   "garantie",
   "panier",
+  "recherche",
 ]);
 
 /** Chemin de la route si elle est livrée, sinon `null` (le lien doit alors être masqué). */
