@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ProductCard } from "@/components/product/ProductCard";
 import { BrandMark } from "@/components/ui/BrandMark";
 import { Eyebrow } from "@/components/ui/Eyebrow";
-import { brandHref, routeFor } from "@/config/site";
+import { brandHref } from "@/config/site";
 import { getBrands, getCatalog, getCategories } from "@/lib/catalog/queries";
 import { isNew } from "@/lib/catalog/is-new";
 import { brandNames, productCount } from "@/lib/catalog/summary";
@@ -23,12 +23,11 @@ export default async function ShopPage() {
     getBrands(),
   ]);
   const today = await getToday();
-  const home = routeFor("accueil");
 
   return (
     <div className="wrap py-14 sm:py-20">
       <Eyebrow>La boutique</Eyebrow>
-      <h1 className="mt-3 text-display-h2">Les produits VERSUS.</h1>
+      <h1 className="mt-3 text-display-h2">Les produits VERSUS</h1>
       <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">
         {productCount(products.length)} pour découvrir les univers {brandNames(brands)}. Prix
         indicatifs en FCFA, projet pédagogique sans vente réelle.
@@ -86,13 +85,6 @@ export default async function ShopPage() {
           );
         })}
       </div>
-      {home ? (
-        <p className="mt-14">
-          <a href={home} className="font-semibold text-accent underline underline-offset-4">
-            Retour à l’accueil
-          </a>
-        </p>
-      ) : null}
     </div>
   );
 }

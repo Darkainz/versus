@@ -77,7 +77,7 @@ export function ProductCard({
           <ProductCardContent {...content} />
         </Link>
       ) : (
-        <ProductCardContent {...content} action={adaptive ? "Voir le produit" : "Acheter"} />
+        <ProductCardContent {...content} action="Voir le produit" />
       )}
     </article>
   );

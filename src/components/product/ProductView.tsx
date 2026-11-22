@@ -1,27 +1,30 @@
+import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { BrandMark } from "@/components/ui/BrandMark";
 import { Price } from "@/components/ui/Price";
 import { buttonClasses } from "@/components/ui/button-styles";
-import { brandHref, routeFor } from "@/config/site";
+import { brandHref, routeFor, site } from "@/config/site";
 import type { ProductDetail } from "@/lib/catalog/types";
 import { initialVariant, variantViews } from "@/lib/catalog/variant-options";
 import { compareRows } from "@/lib/compare/rows";
 import { ProductVisual } from "./ProductVisual";
+import { RelatedProducts } from "./RelatedProducts";
 import { VariantPicker } from "./VariantPicker";
+import type { ProductCardData } from "./ProductCard";
 
 /**
- * Fiche produit (§4.3) : visuel, nom, accroche, prix minimal, choix de la variante et ajout au
- * panier (îlot VariantPicker, étape 5 : seules les variantes actives comptent, et le serveur
- * calcule pour chacune ses options, son texte et son prix rendu),
- * caractéristiques (lignes de `lib/compare/rows.ts`), garantie et mention
- * « Prix indicatifs, aucune vente réelle ». Toutes les données arrivent en props : la même vue
- * servira à l'aperçu admin (étape 8). Le nom de la marque mène à sa page (refonte, lot 3).
+ * Fiche produit (§4.3, refonte §3.4 lot 5) : fil d'Ariane, visuel, nom, accroche, prix minimal,
+ * ligne des paiements simulés, choix de la variante et ajout au panier (îlot VariantPicker),
+ * caractéristiques, garantie, mention « Prix indicatifs » et « Autres produits [marque] ».
+ * Toutes les données arrivent en props : la même vue servira à l'aperçu admin (étape 8).
  */
 export function ProductView({
   product,
   categoryName,
+  relatedProducts = [],
 }: {
   product: ProductDetail;
   categoryName: string;
+  relatedProducts?: readonly ProductCardData[];
 }) {
   const specs = compareRows[product.compare_group].filter(
     (row) => row.key !== "price" && row.key !== "warranty",
@@ -30,7 +33,14 @@ export function ProductView({
 
   return (
     <article className="product-view wrap section">
-      <div className="grid items-center gap-10 md:grid-cols-2 md:gap-16">
+      <Breadcrumb
+        items={[
+          { label: "Accueil", href: routeFor("accueil") },
+          { label: product.brand_name, href: brandHref(product.brand_slug) },
+          { label: product.name },
+        ]}
+      />
+      <div className="mt-8 grid items-center gap-10 md:grid-cols-2 md:gap-16">
         <div>
           <div data-brand={product.brand_slug} className="rounded-tile bg-brand-ground p-8">
             <ProductVisual
@@ -44,7 +54,7 @@ export function ProductView({
           {/* Une seule photo par produit (une par variante à l'étape 4) : on le dit. */}
           {new Set(variants.map((variant) => variant.color_slug)).size > 1 ? (
             <p className="mt-3 text-center text-xs text-muted">
-              Photo d’un seul coloris : la pastille montre le coloris choisi.
+              Photo d&apos;un seul coloris : la pastille montre le coloris choisi.
             </p>
           ) : null}
         </div>
@@ -70,6 +80,9 @@ export function ProductView({
             )}
           </p>
           <p className="mt-2 text-sm text-muted">
+            {site.payments.join(" · ")} (simulés)
+          </p>
+          <p className="mt-2 text-sm text-muted">
             Garantie indiquée : {product.warranty_months} mois
           </p>
           {variants.length > 0 ? (
@@ -93,12 +106,13 @@ export function ProductView({
             ))}
           </dl>
           <p className="mt-3 text-xs text-muted">{product.specs.specs_note}</p>
-          <p className="mt-8 rounded-option bg-surface p-4 text-sm leading-relaxed text-muted">
+          <p className="mt-8 rounded-control bg-surface p-4 text-sm leading-relaxed text-muted">
             Prix indicatifs, aucune vente réelle. Projet pédagogique : les prix en FCFA et les
             caractéristiques affichées sont donnés à titre indicatif.
           </p>
         </div>
       </div>
+      <RelatedProducts brandName={product.brand_name} products={relatedProducts} />
     </article>
   );
 }
