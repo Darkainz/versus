@@ -2,6 +2,7 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { CATEGORIES } from "@/lib/catalog/types";
+import { additionalPhotos } from "./additional-photos";
 import { additionalProducts, additionalProductSources } from "./additional-products";
 import { brands, categories, homeSlots, products } from "./catalog";
 import { productVisualSources } from "./product-visuals";
@@ -84,6 +85,17 @@ describe("catalogue de démonstration", () => {
       );
       expect(product.image_alt?.length, product.code).toBeGreaterThan(0);
     }
+  });
+
+  it("associe chaque photo officielle à un modèle ajouté, les autres gardent le SVG de secours", () => {
+    const codes = new Set(additionalProducts.map((product) => product.code));
+    for (const code of Object.keys(additionalPhotos)) expect(codes.has(code), code).toBe(true);
+    const withoutPhoto = additionalProducts.filter((product) => !additionalPhotos[product.code]);
+    expect(withoutPhoto.map((product) => product.code).toSorted()).toEqual([
+      "i12pmax",
+      "iphone12pro",
+    ]);
+    for (const product of withoutPhoto) expect(product.image_src, product.code).toBeNull();
   });
 
   it("crédite chaque visuel dans SOURCES.md et sur la page /credits", () => {
