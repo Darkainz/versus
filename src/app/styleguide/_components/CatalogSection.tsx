@@ -60,7 +60,7 @@ export function CatalogSection() {
       </div>
       <div className="mt-10">
         <h3 className="mb-3 text-base font-bold">
-          QuizTeaser · aperçu non soumis (affiché sur l’accueil à l’étape 5)
+          QuizTeaser · aperçu non soumis (conservé dans le styleguide, retiré de l’accueil)
         </h3>
         <div className="overflow-hidden rounded-tile">
           <QuizTeaser preview />

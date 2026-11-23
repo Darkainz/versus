@@ -22,11 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function ShopPage({
-  searchParams,
-}: {
-  searchParams: Promise<SearchParams>;
-}) {
+export default function ShopPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   return (
     <Suspense fallback={<ProductGridSkeleton />}>
       <ShopResults searchParams={searchParams} />
@@ -44,10 +40,10 @@ async function ShopResults({ searchParams }: { searchParams: Promise<SearchParam
   ]);
   const { filters, error } = parseCatalogFilters(params);
   const hasFilters =
-    ("category" in filters && filters.category !== undefined) ||
+    filters.category !== undefined ||
     filters.brands.length > 0 ||
-    ("minPrice" in filters && filters.minPrice !== undefined) ||
-    ("maxPrice" in filters && filters.maxPrice !== undefined) ||
+    filters.minPrice !== undefined ||
+    filters.maxPrice !== undefined ||
     filters.inStock ||
     filters.sort !== "newest";
   const visibleProducts = filterCatalog(products, filters);

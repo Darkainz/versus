@@ -2,6 +2,7 @@ import { existsSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { CATEGORIES } from "@/lib/catalog/types";
+import { additionalProducts, additionalProductSources } from "./additional-products";
 import { brands, categories, homeSlots, products } from "./catalog";
 import { productVisualSources } from "./product-visuals";
 
@@ -22,14 +23,13 @@ const unique = (values: readonly string[]) => new Set(values).size === values.le
 const MAX_IMAGE_BYTES = 200 * 1000;
 
 describe("catalogue de démonstration", () => {
-  it("compte 30 produits, 10 par marque, dans des marques et catégories connues", () => {
-    expect(products).toHaveLength(30);
-    for (const brand of brands) {
-      expect(
-        products.filter((product) => product.brand_slug === brand.slug),
-        brand.name,
-      ).toHaveLength(10);
-    }
+  it("compte les produits sourcés dans des marques et catégories connues", () => {
+    expect(products).toHaveLength(103);
+    expect(additionalProducts).toHaveLength(73);
+    expect(additionalProductSources).toHaveLength(additionalProducts.length);
+    expect(products.filter((product) => product.brand_slug === "apple")).toHaveLength(32);
+    expect(products.filter((product) => product.brand_slug === "samsung")).toHaveLength(31);
+    expect(products.filter((product) => product.brand_slug === "xiaomi")).toHaveLength(40);
     for (const product of products) {
       expect(CATEGORIES).toContain(product.category_slug);
       const category = categories.find((item) => item.slug === product.category_slug);
@@ -40,6 +40,17 @@ describe("catalogue de démonstration", () => {
     }
   });
 
+  it("associe chaque modèle ajouté à une source officielle de sa marque", () => {
+    const sources = new Map(additionalProductSources.map((source) => [source.code, source]));
+    expect(sources.size).toBe(additionalProducts.length);
+    for (const product of additionalProducts) {
+      const source = sources.get(product.code);
+      expect(source?.name).toBe(product.name);
+      expect(source?.brand).toBe(product.brand_slug);
+      expect(source?.url).toMatch(/^https:\/\/www\.(apple|samsung|mi)\.com\//);
+    }
+  });
+
   it("a des identifiants, codes, slugs et SKU uniques", () => {
     expect(unique(products.map((product) => product.id))).toBe(true);
     expect(unique(products.map((product) => product.code))).toBe(true);
@@ -47,12 +58,19 @@ describe("catalogue de démonstration", () => {
     expect(unique(products.flatMap((product) => product.variants.map((v) => v.sku)))).toBe(true);
     for (const product of products) {
       expect(product.code).toMatch(/^[a-z0-9]+$/);
+      expect(product.code.length, product.code).toBeLessThanOrEqual(12);
       expect(product.slug).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
     }
   });
 
   it("donne à chaque produit une image existante, légère, aux dimensions réelles", () => {
     for (const product of products) {
+      if (!product.image_src) {
+        expect(product.image_width, product.code).toBeNull();
+        expect(product.image_height, product.code).toBeNull();
+        expect(product.image_alt, product.code).toBeNull();
+        continue;
+      }
       expect(product.image_src, product.code).toBe(`/products/${product.code}.png`);
       const file = join(process.cwd(), "public", product.image_src ?? "");
       expect(existsSync(file), file).toBe(true);
@@ -71,9 +89,12 @@ describe("catalogue de démonstration", () => {
   it("crédite chaque visuel dans SOURCES.md et sur la page /credits", () => {
     const sources = readFileSync(join(process.cwd(), "public/products/SOURCES.md"), "utf8");
     expect(productVisualSources.map((visual) => visual.code).toSorted()).toEqual(
-      products.map((product) => product.code).toSorted(),
+      products
+        .filter((product) => product.image_src)
+        .map((product) => product.code)
+        .toSorted(),
     );
-    for (const product of products) {
+    for (const product of products.filter((item) => item.image_src)) {
       expect(sources, product.code).toContain(`| ${product.code}.png |`);
       expect(productVisualSources.find((visual) => visual.code === product.code)?.brand).toBe(
         product.brand_slug,

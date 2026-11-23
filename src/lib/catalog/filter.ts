@@ -22,7 +22,12 @@ export type CatalogFilters = {
 
 export type SearchParams = Record<string, string | string[] | undefined>;
 
-export function parseCatalogFilters(params: SearchParams) {
+export type ParsedCatalogFilters = {
+  filters: CatalogFilters;
+  error: string | null;
+};
+
+export function parseCatalogFilters(params: SearchParams): ParsedCatalogFilters {
   const parsed = filterSchema.safeParse({
     category: params.category,
     brand: params.brand,
@@ -77,7 +82,8 @@ export function filterCatalog<T extends FilterableProduct>(
   const filtered = products.filter(
     (product) =>
       (!filters.category || product.category_slug === filters.category) &&
-      (filters.brands.length === 0 || filters.brands.includes(product.brand_slug as (typeof BRANDS)[number])) &&
+      (filters.brands.length === 0 ||
+        filters.brands.includes(product.brand_slug as (typeof BRANDS)[number])) &&
       (filters.minPrice === undefined ||
         (product.min_price_fcfa !== null && product.min_price_fcfa >= filters.minPrice)) &&
       (filters.maxPrice === undefined ||

@@ -1,6 +1,6 @@
 const brandList = new Intl.ListFormat("fr-FR", { style: "long", type: "conjunction" });
 
-/** « 30 produits », « 1 produit » : nombre calculé, jamais écrit en dur dans une page. */
+/** « n produits », « 1 produit » : nombre calculé, jamais écrit en dur dans une page. */
 export function productCount(count: number): string {
   return `${count} ${count > 1 ? "produits" : "produit"}`;
 }

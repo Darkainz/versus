@@ -5,7 +5,7 @@ import { brandNames, productCount } from "./summary";
 describe("résumé du catalogue", () => {
   it("accorde le nombre de produits", () => {
     expect(productCount(1)).toBe("1 produit");
-    expect(productCount(products.length)).toBe("30 produits");
+    expect(productCount(products.length)).toBe("103 produits");
   });
 
   it("énumère les marques en français", () => {

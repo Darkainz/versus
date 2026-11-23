@@ -130,10 +130,10 @@ describe("ProductRail", () => {
 
 describe("ProductRail : en-tête et ligne de filtres", () => {
   const links = {
-    all: { href: "/boutique", label: "Tout le catalogue (30)" },
-    apple: { href: "/marques/apple", label: "Voir les 10 produits Apple" },
-    samsung: { href: "/marques/samsung", label: "Voir les 10 produits Samsung" },
-    xiaomi: { href: "/marques/xiaomi", label: "Voir les 10 produits Xiaomi" },
+    all: { href: "/boutique", label: "Tout le catalogue (103)" },
+    apple: { href: "/marques/apple", label: "Voir les 32 produits Apple" },
+    samsung: { href: "/marques/samsung", label: "Voir les 31 produits Samsung" },
+    xiaomi: { href: "/marques/xiaomi", label: "Voir les 40 produits Xiaomi" },
   };
 
   it("affiche le titre reçu et un lien d'en-tête par filtre, que le CSS choisit", () => {
@@ -148,10 +148,10 @@ describe("ProductRail : en-tête et ligne de filtres", () => {
       />,
     );
     expect(screen.getByRole("heading", { name: "Nouveautés" })).toBeTruthy();
-    const all = screen.getByRole("link", { name: "Tout le catalogue (30)" });
+    const all = screen.getByRole("link", { name: "Tout le catalogue (103)" });
     expect(all.getAttribute("href")).toBe("/boutique");
     expect(all.closest("[data-rail-link]")?.getAttribute("data-rail-link")).toBe("all");
-    const samsung = screen.getByRole("link", { name: "Voir les 10 produits Samsung" });
+    const samsung = screen.getByRole("link", { name: "Voir les 31 produits Samsung" });
     expect(samsung.getAttribute("href")).toBe("/marques/samsung");
     expect(samsung.closest("[data-rail-link]")?.getAttribute("data-rail-link")).toBe("samsung");
   });

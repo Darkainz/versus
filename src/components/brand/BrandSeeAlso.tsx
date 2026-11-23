@@ -21,6 +21,7 @@ export function BrandSeeAlso({ links }: { links: readonly SeeAlsoLink[] }) {
           <li key={link.slug}>
             <Link
               href={link.href}
+              prefetch={false}
               data-brand={link.slug}
               className="relative flex min-h-[88px] items-center justify-between gap-4 overflow-hidden rounded-card bg-brand-ground px-6 py-5 transition-shadow duration-(--dur-base) state-hover:shadow-card"
             >

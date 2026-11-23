@@ -41,6 +41,7 @@ export function BrandCompare({
           <li key={`${mine.code}-${theirs.code}`}>
             <Link
               href={href}
+              prefetch={false}
               className="relative grid h-full min-h-11 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-3 gap-y-3 rounded-card border border-line-soft bg-bg p-5 transition-shadow duration-(--dur-base) state-hover:shadow-card"
             >
               <Side product={mine} />

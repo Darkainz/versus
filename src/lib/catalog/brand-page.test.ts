@@ -42,7 +42,6 @@ describe("productsOfBrand", () => {
       expect(selected).toHaveLength(
         products.filter((product) => product.brand_slug === brand).length,
       );
-      expect(selected).toHaveLength(10);
       expect(selected.every((product) => product.brand_slug === brand)).toBe(true);
       const prices = selected.map((product) => product.min_price_fcfa ?? 0);
       expect(prices).toEqual(prices.toSorted((a, b) => b - a));
@@ -70,24 +69,24 @@ describe("groupByCategory", () => {
 
   it("regroupe par catégorie, dans l'ordre des catégories", () => {
     expect(counts("samsung")).toEqual([
-      ["smartphones", 5],
-      ["ecouteurs", 2],
-      ["montres", 2],
+      ["smartphones", 21],
+      ["ecouteurs", 3],
+      ["montres", 6],
       ["bracelets", 1],
     ]);
     expect(counts("xiaomi")).toEqual([
-      ["smartphones", 4],
-      ["ecouteurs", 2],
-      ["montres", 2],
-      ["bracelets", 2],
+      ["smartphones", 17],
+      ["ecouteurs", 10],
+      ["montres", 8],
+      ["bracelets", 5],
     ]);
   });
 
   it("masque une catégorie vide : Apple n'a pas de bracelets", () => {
     expect(counts("apple")).toEqual([
-      ["smartphones", 4],
-      ["ecouteurs", 3],
-      ["montres", 3],
+      ["smartphones", 22],
+      ["ecouteurs", 6],
+      ["montres", 4],
     ]);
   });
 
@@ -104,12 +103,11 @@ describe("groupByCategory", () => {
 
   it("garde l'ordre des produits dans chaque section (haut de gamme d'abord)", () => {
     const [phones] = groupByCategory(productsOfBrand(products, "samsung"), categories);
-    expect(phones?.products.map((product) => product.name)).toEqual([
+    expect(phones?.products).toHaveLength(21);
+    expect(phones?.products.slice(0, 3).map((product) => product.name)).toEqual([
+      "Galaxy Z Fold8 Ultra",
+      "Galaxy Z Fold7",
       "Galaxy Z Fold8",
-      "Galaxy S26 Ultra",
-      "Galaxy Z Flip8",
-      "Galaxy S26",
-      "Galaxy A57 5G",
     ]);
   });
 
@@ -145,9 +143,9 @@ describe("featuredProducts", () => {
   it("prend le produit phare des trois premières catégories", () => {
     const groups = groupByCategory(productsOfBrand(products, "samsung"), categories);
     expect(featuredProducts(groups).map((product) => product.name)).toEqual([
-      "Galaxy Z Fold8",
+      "Galaxy Z Fold8 Ultra",
       "Galaxy Buds4 Pro",
-      "Galaxy Watch Ultra2",
+      "Galaxy Watch Ultra",
     ]);
   });
 
@@ -159,7 +157,7 @@ describe("featuredProducts", () => {
     expect(featuredProducts(groups).map((product) => product.code)).toEqual([
       "ipd",
       "ip18",
-      "ip17",
+      "i16pmax",
     ]);
   });
 });
@@ -261,8 +259,8 @@ describe("brandShowcase", () => {
 
   it("prend le haut de gamme de chaque catégorie, hors hero et tuiles", () => {
     expect(codes("apple")).toEqual(["ipd", "apm2", "awu4"]);
-    expect(codes("samsung")).toEqual(["zf8", "gb4p", "gwu2"]);
-    expect(codes("xiaomi")).toEqual(["x17", "xb6", "xws5"]);
+    expect(codes("samsung")).toEqual(["gzfold8u", "gb4p", "gwu"]);
+    expect(codes("xiaomi")).toEqual(["x15u", "xb5pro", "xiaomiwatch2"]);
   });
 
   it("ne montre que des produits de la marque, jamais un produit exclu", () => {

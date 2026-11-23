@@ -74,7 +74,14 @@ export function ProductVisual({
     // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text -- props de getImageProps (alt compris)
     visual = <img {...props} />;
   } else {
-    visual = <FallbackVisual kind={product.visual_kind} brand={product.brand_slug} label={alt} />;
+    visual = (
+      <FallbackVisual
+        kind={product.visual_kind}
+        brand={product.brand_slug}
+        code={product.code}
+        label={alt}
+      />
+    );
   }
 
   return (

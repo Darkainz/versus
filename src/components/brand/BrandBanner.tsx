@@ -18,7 +18,9 @@ const order = ["order-2", "order-1", "order-3"];
  * boutique fictive » (règle anti-imitation : jamais de logo ni de police de marque), trois
  * produits vedettes en éventail et le sélecteur de marque.
  *
- * Seule image prioritaire de la page : la première vedette (préchargée, `fetchpriority=high`).
+ * Seule image prioritaire de la page : la première vedette qui a une photo (préchargée,
+ * `fetchpriority=high`). Les produits sans photo affichent le SVG de secours, rien à précharger :
+ * s'il n'y a aucune photo parmi les vedettes, la page n'a pas d'image prioritaire.
  */
 export function BrandBanner({
   brand,
@@ -35,6 +37,9 @@ export function BrandBanner({
   featured: readonly VisualProduct[];
   switcher: ReactNode;
 }) {
+  const priorityCode = featured.find(
+    (product) => product.image_src && product.image_width && product.image_height,
+  )?.code;
   return (
     <section
       aria-labelledby="marque-titre"
@@ -69,7 +74,7 @@ export function BrandBanner({
                 key={product.code}
                 product={product}
                 decorative
-                priority={index === 0}
+                priority={product.code === priorityCode}
                 sizes={
                   index === 0
                     ? "(max-width: 640px) 38vw, (max-width: 1024px) 30vw, 220px"

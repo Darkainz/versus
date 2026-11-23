@@ -14,6 +14,7 @@ import { TypographySection } from "./_components/TypographySection";
 import { CatalogSection } from "./_components/CatalogSection";
 import { BrandPageSection } from "./_components/BrandPageSection";
 import { CartSection } from "./_components/CartSection";
+import { CheckoutSection } from "./_components/CheckoutSection";
 
 export const metadata: Metadata = {
   title: "Design system",
@@ -30,6 +31,7 @@ const sections = [
   { id: "catalogue", label: "Catalogue" },
   { id: "pages-marque", label: "Pages marque" },
   { id: "panier", label: "Panier" },
+  { id: "commande", label: "Commande" },
 ];
 
 /**
@@ -77,6 +79,7 @@ export default function StyleguidePage() {
         <CatalogSection />
         <BrandPageSection />
         <CartSection />
+        <CheckoutSection />
       </main>
       <SiteFooter />
     </>

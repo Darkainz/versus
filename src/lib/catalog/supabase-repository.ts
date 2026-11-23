@@ -162,22 +162,45 @@ export const supabaseCatalogRepository: CatalogRepository = {
       supabase.from("products").select("*").eq("slug", slug).maybeSingle(),
     ]);
 
-    const summary = requireData(summaryResult.data, summaryResult.error, `le sommaire du produit ${slug}`);
-    const details = requireData(detailsResult.data, detailsResult.error, `les détails du produit ${slug}`);
-
+    if (summaryResult.error) {
+      throw new Error(
+        `Erreur Supabase pendant le sommaire du produit ${slug} : ${summaryResult.error.message}`,
+        {
+          cause: summaryResult.error,
+        },
+      );
+    }
+    if (detailsResult.error) {
+      throw new Error(
+        `Erreur Supabase pendant les détails du produit ${slug} : ${detailsResult.error.message}`,
+        {
+          cause: detailsResult.error,
+        },
+      );
+    }
+    const summary = summaryResult.data;
+    const details = detailsResult.data;
     if (!summary || !details) return null;
 
     const [variantsResult, specsResult] = await Promise.all([
-      supabase
-        .from("product_variants")
-        .select("*")
-        .eq("product_id", summary.id)
-        .order("position"),
+      supabase.from("product_variants").select("*").eq("product_id", summary.id).order("position"),
       supabase.from("product_specs").select("*").eq("product_id", summary.id).maybeSingle(),
     ]);
 
-    const variants = requireData(variantsResult.data, variantsResult.error, `les variantes du produit ${slug}`);
-    const specs = requireData(specsResult.data, specsResult.error, `les specs du produit ${slug}`);
+    const variants = requireData(
+      variantsResult.data,
+      variantsResult.error,
+      `les variantes du produit ${slug}`,
+    );
+    if (specsResult.error) {
+      throw new Error(
+        `Erreur Supabase pendant les specs du produit ${slug} : ${specsResult.error.message}`,
+        {
+          cause: specsResult.error,
+        },
+      );
+    }
+    const specs = specsResult.data;
 
     return getProductDetail(summary, details, variants, specs);
   },
@@ -192,10 +215,26 @@ export const supabaseCatalogRepository: CatalogRepository = {
         supabase.from("home_slots").select("*").eq("is_active", true).order("position"),
       ]);
 
-    const summaries = requireData(summariesResult.data, summariesResult.error, "les sommaires d'accueil");
-    const details = requireData(detailsResult.data, detailsResult.error, "les détails des produits d'accueil");
-    const variants = requireData(variantsResult.data, variantsResult.error, "les variantes d'accueil");
-    const specs = requireData(specsResult.data, specsResult.error, "les fiches techniques d'accueil");
+    const summaries = requireData(
+      summariesResult.data,
+      summariesResult.error,
+      "les sommaires d'accueil",
+    );
+    const details = requireData(
+      detailsResult.data,
+      detailsResult.error,
+      "les détails des produits d'accueil",
+    );
+    const variants = requireData(
+      variantsResult.data,
+      variantsResult.error,
+      "les variantes d'accueil",
+    );
+    const specs = requireData(
+      specsResult.data,
+      specsResult.error,
+      "les fiches techniques d'accueil",
+    );
     const slots = requireData(slotsResult.data, slotsResult.error, "les emplacements d'accueil");
 
     const summariesById = new Map(summaries.map((s) => [s.id, s]));
