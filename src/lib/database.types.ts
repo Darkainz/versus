@@ -3,6 +3,70 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      addresses: {
+        Row: {
+          city: string;
+          created_at: string;
+          district: string;
+          id: string;
+          instructions: string | null;
+          is_default: boolean;
+          label: string;
+          landmark: string;
+          phone: string;
+          recipient_name: string;
+          updated_at: string;
+          user_id: string;
+          zone_code: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          city: string;
+          created_at?: string;
+          district: string;
+          id?: string;
+          instructions?: string | null;
+          is_default?: boolean;
+          label?: string;
+          landmark: string;
+          phone: string;
+          recipient_name: string;
+          updated_at?: string;
+          user_id: string;
+          zone_code: string;
+        };
+        Update: {
+          city?: string;
+          created_at?: string;
+          district?: string;
+          id?: string;
+          instructions?: string | null;
+          is_default?: boolean;
+          label?: string;
+          landmark?: string;
+          phone?: string;
+          recipient_name?: string;
+          updated_at?: string;
+          user_id?: string;
+          zone_code?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "addresses_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "addresses_zone_code_fkey";
+            columns: ["zone_code"];
+            isOneToOne: false;
+            referencedRelation: "delivery_zones";
+            referencedColumns: ["code"];
+          },
+        ];
+      };
       brands: {
         Row: {
           name: string;
@@ -24,6 +88,33 @@ export type Database = {
           tagline?: string;
         };
         Relationships: [];
+      };
+      carts: {
+        Row: {
+          items: NonNullable<Json>;
+          updated_at: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          items?: NonNullable<Json>;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          items?: NonNullable<Json>;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "carts_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: true;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       categories: {
         Row: {
@@ -132,6 +223,287 @@ export type Database = {
             columns: ["product_id"];
             isOneToOne: false;
             referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      order_items: {
+        Row: {
+          id: string;
+          line_total_fcfa: number | null;
+          order_id: string;
+          product_id: string;
+          product_name: string;
+          quantity: number;
+          sku: string;
+          unit_price_fcfa: number;
+          variant_id: string;
+          variant_label: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          id?: string;
+          line_total_fcfa?: never;
+          order_id: string;
+          product_id: string;
+          product_name: string;
+          quantity: number;
+          sku: string;
+          unit_price_fcfa: number;
+          variant_id: string;
+          variant_label: string;
+        };
+        Update: {
+          id?: string;
+          line_total_fcfa?: never;
+          order_id?: string;
+          product_id?: string;
+          product_name?: string;
+          quantity?: number;
+          sku?: string;
+          unit_price_fcfa?: number;
+          variant_id?: string;
+          variant_label?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "catalog_products";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey";
+            columns: ["product_id"];
+            isOneToOne: false;
+            referencedRelation: "products";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "order_items_variant_id_fkey";
+            columns: ["variant_id"];
+            isOneToOne: false;
+            referencedRelation: "product_variants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      order_status_history: {
+        Row: {
+          actor: Database["public"]["Enums"]["order_actor"];
+          actor_id: string | null;
+          created_at: string;
+          from_status: Database["public"]["Enums"]["order_status"] | null;
+          id: number;
+          note: string | null;
+          order_id: string;
+          to_status: Database["public"]["Enums"]["order_status"];
+        };
+        ComputedFields: never;
+        Insert: {
+          actor: Database["public"]["Enums"]["order_actor"];
+          actor_id?: string | null;
+          created_at?: string;
+          from_status?: Database["public"]["Enums"]["order_status"] | null;
+          id?: never;
+          note?: string | null;
+          order_id: string;
+          to_status: Database["public"]["Enums"]["order_status"];
+        };
+        Update: {
+          actor?: Database["public"]["Enums"]["order_actor"];
+          actor_id?: string | null;
+          created_at?: string;
+          from_status?: Database["public"]["Enums"]["order_status"] | null;
+          id?: never;
+          note?: string | null;
+          order_id?: string;
+          to_status?: Database["public"]["Enums"]["order_status"];
+        };
+        Relationships: [
+          {
+            foreignKeyName: "order_status_history_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      order_transitions: {
+        Row: {
+          actor: Database["public"]["Enums"]["order_actor"];
+          from_status: Database["public"]["Enums"]["order_status"];
+          to_status: Database["public"]["Enums"]["order_status"];
+        };
+        ComputedFields: never;
+        Insert: {
+          actor: Database["public"]["Enums"]["order_actor"];
+          from_status: Database["public"]["Enums"]["order_status"];
+          to_status: Database["public"]["Enums"]["order_status"];
+        };
+        Update: {
+          actor?: Database["public"]["Enums"]["order_actor"];
+          from_status?: Database["public"]["Enums"]["order_status"];
+          to_status?: Database["public"]["Enums"]["order_status"];
+        };
+        Relationships: [];
+      };
+      orders: {
+        Row: {
+          access_token_hash: string;
+          anonymized_at: string | null;
+          cancel_reason: string | null;
+          cash_collected_at: string | null;
+          city: string;
+          created_at: string;
+          customer_email: string | null;
+          customer_name: string;
+          customer_phone: string;
+          district: string;
+          eta_label: string;
+          fictitious_ack_at: string;
+          id: string;
+          idempotency_key: string;
+          instructions: string | null;
+          landmark: string;
+          number: string;
+          payment_deadline: string | null;
+          payment_method: Database["public"]["Enums"]["payment_method"];
+          payment_status: Database["public"]["Enums"]["payment_status"];
+          shipping_fcfa: number;
+          status: Database["public"]["Enums"]["order_status"];
+          subtotal_fcfa: number;
+          total_fcfa: number | null;
+          updated_at: string;
+          user_id: string | null;
+          zone_code: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          access_token_hash: string;
+          anonymized_at?: string | null;
+          cancel_reason?: string | null;
+          cash_collected_at?: string | null;
+          city: string;
+          created_at?: string;
+          customer_email?: string | null;
+          customer_name: string;
+          customer_phone: string;
+          district: string;
+          eta_label: string;
+          fictitious_ack_at: string;
+          id?: string;
+          idempotency_key: string;
+          instructions?: string | null;
+          landmark: string;
+          number?: string;
+          payment_deadline?: string | null;
+          payment_method: Database["public"]["Enums"]["payment_method"];
+          payment_status: Database["public"]["Enums"]["payment_status"];
+          shipping_fcfa: number;
+          status: Database["public"]["Enums"]["order_status"];
+          subtotal_fcfa: number;
+          total_fcfa?: never;
+          updated_at?: string;
+          user_id?: string | null;
+          zone_code: string;
+        };
+        Update: {
+          access_token_hash?: string;
+          anonymized_at?: string | null;
+          cancel_reason?: string | null;
+          cash_collected_at?: string | null;
+          city?: string;
+          created_at?: string;
+          customer_email?: string | null;
+          customer_name?: string;
+          customer_phone?: string;
+          district?: string;
+          eta_label?: string;
+          fictitious_ack_at?: string;
+          id?: string;
+          idempotency_key?: string;
+          instructions?: string | null;
+          landmark?: string;
+          number?: string;
+          payment_deadline?: string | null;
+          payment_method?: Database["public"]["Enums"]["payment_method"];
+          payment_status?: Database["public"]["Enums"]["payment_status"];
+          shipping_fcfa?: number;
+          status?: Database["public"]["Enums"]["order_status"];
+          subtotal_fcfa?: number;
+          total_fcfa?: never;
+          updated_at?: string;
+          user_id?: string | null;
+          zone_code?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "orders_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "orders_zone_code_fkey";
+            columns: ["zone_code"];
+            isOneToOne: false;
+            referencedRelation: "delivery_zones";
+            referencedColumns: ["code"];
+          },
+        ];
+      };
+      payment_attempts: {
+        Row: {
+          created_at: string;
+          expires_at: string;
+          id: string;
+          method: Database["public"]["Enums"]["payment_method"];
+          msisdn_masked: string | null;
+          order_id: string;
+          outcome: Database["public"]["Enums"]["attempt_outcome"];
+          reference: string;
+          resolved_at: string | null;
+        };
+        ComputedFields: never;
+        Insert: {
+          created_at?: string;
+          expires_at: string;
+          id?: string;
+          method: Database["public"]["Enums"]["payment_method"];
+          msisdn_masked?: string | null;
+          order_id: string;
+          outcome?: Database["public"]["Enums"]["attempt_outcome"];
+          reference: string;
+          resolved_at?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          expires_at?: string;
+          id?: string;
+          method?: Database["public"]["Enums"]["payment_method"];
+          msisdn_masked?: string | null;
+          order_id?: string;
+          outcome?: Database["public"]["Enums"]["attempt_outcome"];
+          reference?: string;
+          resolved_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "payment_attempts_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
             referencedColumns: ["id"];
           },
         ];
@@ -472,6 +844,58 @@ export type Database = {
         };
         Relationships: [];
       };
+      stock_movements: {
+        Row: {
+          actor_id: string | null;
+          created_at: string;
+          delta: number;
+          id: number;
+          note: string | null;
+          order_id: string | null;
+          reason: Database["public"]["Enums"]["stock_reason"];
+          stock_after: number;
+          variant_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          actor_id?: string | null;
+          created_at?: string;
+          delta: number;
+          id?: never;
+          note?: string | null;
+          order_id?: string | null;
+          reason: Database["public"]["Enums"]["stock_reason"];
+          stock_after: number;
+          variant_id: string;
+        };
+        Update: {
+          actor_id?: string | null;
+          created_at?: string;
+          delta?: number;
+          id?: never;
+          note?: string | null;
+          order_id?: string | null;
+          reason?: Database["public"]["Enums"]["stock_reason"];
+          stock_after?: number;
+          variant_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_order_id_fkey";
+            columns: ["order_id"];
+            isOneToOne: false;
+            referencedRelation: "orders";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "stock_movements_variant_id_fkey";
+            columns: ["variant_id"];
+            isOneToOne: false;
+            referencedRelation: "product_variants";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       user_roles: {
         Row: {
           granted_at: string;
@@ -515,8 +939,8 @@ export type Database = {
           image_src: string | null;
           image_width: number | null;
           in_stock: boolean | null;
-          min_price_fcfa: number | null;
           max_price_fcfa: number | null;
+          min_price_fcfa: number | null;
           name: string;
           new_until: string | null;
           release_date: string;
@@ -545,8 +969,93 @@ export type Database = {
       };
     };
     Functions: {
+      admin_adjust_stock: {
+        Args: {
+          p_delta: number;
+          p_note?: string;
+          p_reason: Database["public"]["Enums"]["stock_reason"];
+          p_variant_id: string;
+        };
+        Returns: number;
+      };
+      admin_dashboard_stats: { Args: Record<PropertyKey, never>; Returns: Json };
+      admin_save_delivery_settings: { Args: { p_settings: Json; p_zones: Json }; Returns: boolean };
+      admin_set_order_status: {
+        Args: {
+          p_cash_collected?: boolean;
+          p_note?: string;
+          p_order_id: string;
+          p_to: Database["public"]["Enums"]["order_status"];
+        };
+        Returns: boolean;
+      };
+      admin_set_product_image_primary: {
+        Args: { p_image_id: string; p_product_id: string };
+        Returns: boolean;
+      };
+      admin_update_product_variant: {
+        Args: {
+          p_color_hex?: string;
+          p_color_name: string;
+          p_color_slug: string;
+          p_is_active: boolean;
+          p_is_default: boolean;
+          p_low_stock_threshold: number;
+          p_price_fcfa: number;
+          p_product_id: string;
+          p_size_mm?: number;
+          p_sku: string;
+          p_storage_gb?: number;
+          p_variant_id: string;
+        };
+        Returns: boolean;
+      };
+      anonymize_my_account: { Args: Record<PropertyKey, never>; Returns: number };
+      cancel_my_order: { Args: { p_number: string }; Returns: boolean };
+      claim_guest_order: { Args: { p_number: string; p_token: string }; Returns: boolean };
+      create_order: {
+        Args: {
+          p_customer: Json;
+          p_delivery: Json;
+          p_fictitious_ack: boolean;
+          p_idempotency_key: string;
+          p_items: Json;
+          p_method: Database["public"]["Enums"]["payment_method"];
+        };
+        Returns: {
+          access_token: string;
+          order_number: string;
+          payment_status: Database["public"]["Enums"]["payment_status"];
+          status: Database["public"]["Enums"]["order_status"];
+        }[];
+      };
+      expire_overdue_orders: { Args: Record<PropertyKey, never>; Returns: number };
+      export_my_data: { Args: Record<PropertyKey, never>; Returns: Json };
+      get_order_for_viewer: { Args: { p_number: string; p_token?: string }; Returns: Json };
       ping: { Args: Record<PropertyKey, never>; Returns: boolean };
       quote_cart: { Args: { p_items: Json; p_zone_code?: string }; Returns: Json };
+      resolve_payment: {
+        Args: {
+          p_number: string;
+          p_outcome: Database["public"]["Enums"]["attempt_outcome"];
+          p_reference: string;
+          p_token: string;
+        };
+        Returns: boolean;
+      };
+      start_payment: {
+        Args: {
+          p_method: Database["public"]["Enums"]["payment_method"];
+          p_msisdn?: string;
+          p_number: string;
+          p_token: string;
+        };
+        Returns: {
+          expires_at: string;
+          reference: string;
+        }[];
+      };
+      track_order: { Args: { p_number: string; p_phone: string }; Returns: Json };
     };
     Enums: {
       attempt_outcome: "pending" | "succeeded" | "failed" | "expired";

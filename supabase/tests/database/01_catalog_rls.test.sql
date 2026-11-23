@@ -1,6 +1,6 @@
 begin;
 
-select plan(3);
+select plan(4);
 
 insert into public.products (
   id, code, slug, brand_slug, category_slug, name, tagline, visual_kind,
@@ -46,5 +46,21 @@ select throws_ok(
 );
 
 reset role;
+
+select set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-000000000099', true);
+select set_config('request.jwt.claim.role', 'authenticated', true);
+set local role authenticated;
+
+update public.products
+set tagline = 'Modification client interdite'
+where code = 'testinactive';
+
+reset role;
+
+select is(
+  (select tagline from public.products where code = 'testinactive'),
+  'Fixture pgTAP',
+  'un client authentifié ne peut pas mettre à jour le catalogue'
+);
 select * from finish();
 rollback;
