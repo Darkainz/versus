@@ -6,7 +6,7 @@
 - mouvement réduit (aucun défilement automatique, première diapositive) et
   `animations: "disabled"` ;
 - `VS_TODAY=2026-11-12`, fixé par `playwright.config.ts` (badges « Nouveau » stables) ;
-- polices chargées (`document.fonts.ready`) et images décodées ; le test des 30 visuels de la
+- polices chargées (`document.fonts.ready`) et images décodées ; le test des visuels de la
   boutique force leur chargement (`loading="eager"`) puis attend `networkidle`, afin de vérifier
   aussi les images sous la ligne de flottaison ;
 - seuil : **0,5 % de pixels différents au plus** (`maxDiffPixelRatio: 0.005`), pour absorber
@@ -77,3 +77,8 @@ puis les faire relire avec le diff du commit.
   SVG pour les produits Samsung et Xiaomi sans photo) et la disparition du badge de développement
   de Next.js qui figurait par erreur dans l'ancienne référence. Les références Linux (CI) restent
   à régénérer comme décrit plus haut.
+- **2026-11-23** (photos officielles) : référence `win32` `accueil-1440` régénérée après comparaison
+  visuelle de l'image obtenue et de la différence (seules les trois vignettes des cartes Samsung et
+  Xiaomi de « Parcourir par marque » changent : le SVG de secours cède la place aux photos
+  Galaxy Z Fold8 Ultra, Buds3 FE, Watch Ultra, Xiaomi 15 Ultra, Buds 5 et Watch 2). `accueil-390`
+  inchangée. Références Linux (CI) toujours à régénérer.

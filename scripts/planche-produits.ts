@@ -1,5 +1,5 @@
 /**
- * Planche contact des visuels produits (refonte, lot 1) : les 30 visuels de public/products sur
+ * Planche contact des visuels produits (refonte, lot 1) : les visuels de public/products (un par produit avec photo) sur
  * un fond uniforme, groupés par marque, avec le nom, le prix « Dès … FCFA », le code et le poids
  * du fichier. Sert à valider l'homogénéité du recadrage avant d'écrire les pages.
  *
@@ -13,6 +13,9 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { chromium } from "@playwright/test";
 import { brands, products } from "../src/data/catalog";
 import { formatFCFA } from "../src/lib/format/fcfa";
+
+/** Seuls les produits avec photo figurent sur la planche (les autres affichent le SVG de secours). */
+const withPhoto = products.filter((product) => product.image_src);
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT_DIR = join(ROOT, "docs", "refonte");
@@ -44,7 +47,7 @@ function tile(product: (typeof products)[number]) {
 function page() {
   const sections = brands
     .map((brand) => {
-      const items = products.filter((product) => product.brand_slug === brand.slug);
+      const items = withPhoto.filter((product) => product.brand_slug === brand.slug);
       return `    <section>
       <h2>${escape(brand.name)} <small>${items.length} produits</small></h2>
       <div class="grid">
@@ -74,7 +77,7 @@ ${items.map(tile).join("\n")}
     </style>
   </head>
   <body>
-    <h1>Planche des ${products.length} visuels produits</h1>
+    <h1>Planche des ${withPhoto.length} visuels produits</h1>
     <p class="intro">Refonte VERSUS, lot 1. Fond uniforme, cadre de 180 px de haut, object-fit: contain : même rendu que les cartes de la boutique. Prix indicatifs (prix officiel en France × 655,957, arrondi au millier).</p>
 ${sections}
   </body>
