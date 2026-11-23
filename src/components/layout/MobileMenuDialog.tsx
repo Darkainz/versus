@@ -1,16 +1,30 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
-import { Dialog } from "@/components/ui/Dialog";
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { iconButtonClasses } from "@/components/ui/icon-button-styles";
 
 /** Le menu mobile n'existe que sous ce seuil (maquette : `.nav { display: none }` ≤ 900 px). */
 const DESKTOP_QUERY = "(min-width: 901px)";
 
+const MenuDialog = lazy(() =>
+  import("./MobileMenuDialogContent").then((module) => ({
+    default: module.MobileMenuDialogContent,
+  })),
+);
+
 /**
- * Îlot client du menu mobile : l'état ouvert/fermé et la boîte de dialogue. Le contenu (logo,
- * liens, icônes) est rendu par le serveur et reçu en props : il n'alourdit pas le JavaScript.
+ * Îlot client du menu mobile : la boîte de dialogue complète est chargée au premier clic. Le
+ * contenu (logo, liens, icônes) est rendu par le serveur et reçu en props.
  * - bouton « Menu » avec `aria-expanded` et `aria-controls` ;
  * - `<dialog>` plein écran : Échap ferme, focus piégé, focus rendu au bouton ;
  * - se ferme quand on suit un lien (délégation de clic : logo compris), quand le chemin change
@@ -30,11 +44,12 @@ export function MobileMenuDialog({
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
+  const [requested, setRequested] = useState(false);
   const pathname = usePathname();
   const [menuPath, setMenuPath] = useState(pathname);
-  const buttonRef = useRef<HTMLButtonElement>(null);
   const dialogId = useId();
   const titleId = useId();
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   // Changement de chemin : on ferme pendant le rendu (ajustement d'état recommandé par React).
   if (menuPath !== pathname) {
@@ -64,49 +79,31 @@ export function MobileMenuDialog({
         type="button"
         aria-label="Menu"
         aria-expanded={open}
-        aria-controls={dialogId}
+        aria-controls={requested ? dialogId : undefined}
         aria-haspopup="dialog"
         className={iconButtonClasses}
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setRequested(true);
+          setOpen(true);
+        }}
       >
         {menuIcon}
       </button>
-      <Dialog
-        id={dialogId}
-        open={open}
-        onClose={close}
-        labelledBy={titleId}
-        variant="fullscreen"
-        returnFocusRef={buttonRef}
-        closeOnBackdrop={false}
-      >
-        {/* Suivre un lien du menu (logo compris) le ferme. */}
-        <div
-          className="flex min-h-0 flex-1 flex-col"
-          onClick={(event) => {
-            if (event.target instanceof Element && event.target.closest("a")) close();
-          }}
-        >
-          <div className="wrap flex h-14 w-full shrink-0 items-center justify-between gap-5 border-b border-header-line">
-            {logo}
-            <button
-              type="button"
-              aria-label="Fermer le menu"
-              data-autofocus
-              className={iconButtonClasses}
-              onClick={close}
-            >
-              {closeIcon}
-            </button>
-          </div>
-          <nav aria-labelledby={titleId} className="wrap w-full flex-1 overflow-y-auto py-8">
-            <h2 id={titleId} className="sr-only">
-              Menu
-            </h2>
+      {requested ? (
+        <Suspense fallback={<div id={dialogId} hidden />}>
+          <MenuDialog
+            id={dialogId}
+            titleId={titleId}
+            open={open}
+            onClose={close}
+            returnFocusRef={buttonRef}
+            closeIcon={closeIcon}
+            logo={logo}
+          >
             {children}
-          </nav>
-        </div>
-      </Dialog>
+          </MenuDialog>
+        </Suspense>
+      ) : null}
     </div>
   );
 }

@@ -3,22 +3,30 @@ import type { KeyboardEvent, ReactNode } from "react";
 export type CarouselIcons = {
   previous: ReactNode;
   next: ReactNode;
+  play: ReactNode;
+  pause: ReactNode;
 };
 
 /**
- * Commandes du carrousel : précédent, un point par diapositive et suivant. La sélection est
- * toujours explicite, au clic ou avec les flèches du clavier.
+ * Commandes du carrousel : précédent, un point par diapositive, suivant et lecture/pause.
+ * La sélection est toujours explicite, au clic ou avec les flèches du clavier.
  */
 export function CarouselControls({
   names,
   active,
   icons,
+  autoplay,
+  paused,
   onSelect,
+  onTogglePause,
 }: {
   names: readonly string[];
   active: number;
   icons: CarouselIcons;
+  autoplay: boolean;
+  paused: boolean;
   onSelect: (index: number) => void;
+  onTogglePause: () => void;
 }) {
   function onKeyDown(event: KeyboardEvent<HTMLElement>) {
     if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
@@ -66,6 +74,21 @@ export function CarouselControls({
       >
         {icons.next}
       </button>
+      {autoplay && (
+        <button
+          type="button"
+          className="hero-button"
+          aria-label={
+            paused
+              ? "Reprendre le défilement automatique"
+              : "Mettre le défilement automatique en pause"
+          }
+          data-carousel-playback=""
+          onClick={onTogglePause}
+        >
+          {paused ? icons.play : icons.pause}
+        </button>
+      )}
     </div>
   );
 }

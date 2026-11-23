@@ -13,7 +13,7 @@ const icons = {
  * Pastilles de catégories de l'accueil (refonte, §3.1), composant serveur : « Smartphones 13 ·
  * Écouteurs 7 · Montres 7 · Bracelets 3 », comptes calculés à partir du catalogue. Elles défilent
  * horizontalement sur téléphone. Chaque cible passe par `routeFor()` (ancres de la boutique) ;
- * « Comparer » n'en fait plus partie (lien discret du hero).
+ * la comparaison complète reste accessible depuis le menu.
  */
 export function CategoryNav({
   categories,

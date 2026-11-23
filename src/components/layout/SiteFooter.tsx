@@ -44,6 +44,7 @@ export function SiteFooter() {
                     <NavLink
                       href={link.href}
                       markCurrent={!mainNavHrefs.has(link.href)}
+                      prefetch={false}
                       className={linkClasses}
                     >
                       {link.label}
@@ -60,7 +61,7 @@ export function SiteFooter() {
             <ul aria-label="Informations légales" className="mb-2 flex flex-wrap gap-x-5">
               {legalLinks.map((link) => (
                 <li key={link.href}>
-                  <NavLink href={link.href} className={linkClasses}>
+                  <NavLink href={link.href} prefetch={false} className={linkClasses}>
                     {link.label}
                   </NavLink>
                 </li>

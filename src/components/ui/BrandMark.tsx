@@ -59,7 +59,7 @@ export function BrandMark({
 
   if (href) {
     return (
-      <Link href={href} data-brand={brand} className={classes}>
+      <Link href={href} prefetch={false} data-brand={brand} className={classes}>
         {content}
       </Link>
     );

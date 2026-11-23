@@ -18,6 +18,7 @@ export function Breadcrumb({ items }: { items: readonly BreadcrumbItem[] }) {
             {item.href ? (
               <Link
                 href={item.href}
+                prefetch={false}
                 className="inline-flex min-h-11 items-center underline-offset-4 state-hover:text-ink state-hover:underline"
               >
                 {item.label}

@@ -24,7 +24,7 @@ const features: ReadonlyArray<{ icon: IconName; title: string; body: string }> =
 
 export function FeatureGrid() {
   return (
-    <section aria-labelledby="engagements-titre" className="section">
+    <section aria-labelledby="engagements-titre" className="section md:pb-[80px]">
       <h2 id="engagements-titre" className="sr-only">
         Nos engagements
       </h2>

@@ -555,18 +555,6 @@
     margin-top: 20px;
   }
 
-  .hero-compare-link {
-    display: inline-flex;
-    min-height: 44px;
-    align-items: center;
-    padding-inline: 10px;
-    color: var(--hero-ink);
-    font-size: 15px;
-    font-weight: 600;
-    text-decoration: underline;
-    text-underline-offset: 4px;
-  }
-
   .hero-art {
     position: relative;
     display: flex;
@@ -604,8 +592,8 @@
   }
 
   /*
-   * Barre de commandes unique (‹ › ● ○ ○), cibles de 44 px : sous la photo sur téléphone, sous
-   * le texte (colonne de gauche) à partir de 901 px. Jamais par-dessus le produit.
+   * Barre de commandes (‹ › ● ○ ○ Lecture/Pause), cibles de 44 px : sous la photo sur téléphone,
+   * sous le texte (colonne de gauche) à partir de 901 px. Jamais par-dessus le produit.
    */
   .hero-controls {
     position: absolute;

@@ -12,7 +12,7 @@ describe("isCurrentLink", () => {
 
   it("ne marque jamais une ancre, même sur sa page (/boutique#smartphones)", () => {
     expect(isCurrentLink("/boutique", "/boutique#smartphones")).toBe(false);
-    expect(isCurrentLink("/", "/#comparer")).toBe(false);
+    expect(isCurrentLink("/", "/#nouveautes")).toBe(false);
     expect(isCurrentLink("/boutique", "#smartphones")).toBe(false);
   });
 

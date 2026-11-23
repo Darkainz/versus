@@ -60,6 +60,7 @@ export function PromoTile({
         <div className="promo-tile-links">
           <Button
             href={productHref(product.slug)}
+            prefetch={false}
             variant="primary"
             aria-label={`Voir le produit ${product.name}`}
           >

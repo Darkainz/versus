@@ -17,6 +17,7 @@ describe("routeFor", () => {
     expect(routeFor("accueil")).toBe("/");
     expect(routeFor("mentionsLegales")).toBe("/mentions-legales");
     expect(routeFor("credits")).toBe("/credits");
+    expect(routeFor("aideAuChoix")).toBe("/aide-au-choix");
   });
 
   it("déclare livrées les pages d'information de l'étape 2", () => {
@@ -71,7 +72,17 @@ describe("deliveredLinks et deliveredGroups", () => {
 });
 
 describe("gabarit du lot 3 de la refonte", () => {
-  it("affiche le panier maintenant que sa page existe", () => {
+  it("affiche le comparateur et le panier maintenant que leurs pages existent", () => {
+    expect(headerActions).toContainEqual({
+      key: "compare",
+      label: "Comparateur",
+      href: "/comparer",
+    });
+    expect(headerActions).toContainEqual({
+      key: "account",
+      label: "Mon compte",
+      href: "/compte",
+    });
     expect(headerActions).toContainEqual({ key: "cart", label: "Panier", href: "/panier" });
   });
 
@@ -94,6 +105,13 @@ describe("gabarit du lot 3 de la refonte", () => {
           { label: "Bracelets", href: "/boutique#bracelets" },
         ],
       },
+      {
+        label: "Outils",
+        links: [
+          { label: "Comparer", href: "/comparer" },
+          { label: "Aide au choix", href: "/aide-au-choix" },
+        ],
+      },
     ]);
   });
 
@@ -103,6 +121,7 @@ describe("gabarit du lot 3 de la refonte", () => {
       {
         label: "Aide",
         links: [
+          { label: "Suivi de commande", href: "/suivi" },
           { label: "Livraison et retours", href: "/livraison" },
           { label: "Garantie", href: "/garantie" },
         ],
@@ -123,8 +142,11 @@ describe("gabarit du lot 3 de la refonte", () => {
       "/marques/apple",
       "/marques/samsung",
       "/marques/xiaomi",
+      "/suivi",
       "/livraison",
       "/garantie",
+      "/comparer",
+      "/aide-au-choix",
       "/mentions-legales",
     ]);
     expect(legalLinks.map((l) => l.href)).toEqual(["/confidentialite", "/cgv", "/credits"]);
