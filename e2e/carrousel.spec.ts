@@ -6,16 +6,24 @@ async function activeSlide(page: Page) {
   return page.locator(".hero-slide-active").getAttribute("data-product-slide");
 }
 
-test.describe("carrousel manuel de l'accueil", () => {
-  test("ne change pas de diapositive sans action du visiteur", async ({ page }) => {
+test.describe("carrousel de l'accueil", () => {
+  test("avance automatiquement entre les trois produits", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator(HERO)).toHaveAttribute("data-manual", "");
-    await expect(page.locator(".hero-slides")).toHaveAttribute("aria-live", "polite");
+    await page.locator(HERO).hover();
+    await expect(page.locator(HERO)).toHaveAttribute("data-autoplay", "");
+    await expect(page.locator(".hero-slides")).toHaveAttribute("aria-live", "off");
     expect(await activeSlide(page)).toBe("ip18");
-    await page.waitForTimeout(6500);
-    expect(await activeSlide(page)).toBe("ip18");
-    // Aucun bouton de lecture ou de pause : il n'y a pas de défilement automatique.
-    await expect(page.getByRole("button", { name: /défilement|lecture|pause/i })).toHaveCount(0);
+    await expect(page.locator('[data-product-slide="s26u"]')).toHaveClass(/hero-slide-active/, {
+      timeout: 8000,
+    });
+  });
+
+  test("suspend et reprend la rotation avec la commande lecture/pause", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Mettre le défilement automatique en pause" }).click();
+    await expect(page.locator(HERO)).toHaveAttribute("data-paused", "");
+    await page.getByRole("button", { name: "Reprendre le défilement automatique" }).click();
+    await expect(page.locator(HERO)).not.toHaveAttribute("data-paused");
   });
 
   test("change avec les commandes, les points et les flèches du clavier", async ({ page }) => {
@@ -70,6 +78,7 @@ test.describe("carrousel manuel de l'accueil", () => {
   }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
+    await expect(page.locator(HERO)).not.toHaveAttribute("data-autoplay");
     await expect(page.locator(".hero-slide-active h2")).toHaveText("iPhone 18 Pro");
     for (const element of await page.locator(".hero-slide-active .hero-text > *").all()) {
       await expect(element).toBeVisible();
@@ -102,6 +111,7 @@ test.describe("carrousel sur écran tactile", () => {
   test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 844 } });
 
   test("change de diapositive au premier appui", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
     await page.getByRole("button", { name: "Afficher Galaxy S26 Ultra" }).tap();
     expect(await activeSlide(page)).toBe("s26u");

@@ -1,6 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 import { brands, categories, products } from "../src/data/catalog";
+import { featuredProducts, groupByCategory, productsOfBrand } from "../src/lib/catalog/brand-page";
 import { productCount } from "../src/lib/catalog/summary";
 
 /**
@@ -44,7 +45,7 @@ for (const brand of brands) {
 
   test.describe(`page ${path}`, () => {
     test(`n'affiche que les ${expected.length} produits ${brand.name}`, async ({ page }) => {
-      expect(expected, "10 produits par marque (lot 1)").toHaveLength(10);
+      expect(expected.length, "au moins un produit par marque").toBeGreaterThan(0);
       const response = await page.goto(path);
       expect(response?.status()).toBe(200);
       await expect(page.getByRole("heading", { level: 1, name: brand.name })).toBeVisible();
@@ -123,9 +124,18 @@ for (const brand of brands) {
     });
 
     test("une seule image prioritaire", async ({ page }) => {
+      // Une image prioritaire si une vedette du bandeau a une photo ; sinon (SVG de secours),
+      // aucune : le compte se déduit du catalogue.
+      const groups = groupByCategory(productsOfBrand(products, brand.slug), categories);
+      const hasPhoto = featuredProducts(groups).some(
+        (product) => product.image_src && product.image_width && product.image_height,
+      );
+      const expectedPriority = hasPhoto ? 1 : 0;
       await page.goto(path);
-      await expect(page.locator('link[rel="preload"][as="image"]')).toHaveCount(1);
-      await expect(page.locator('img[fetchpriority="high"], img[loading="eager"]')).toHaveCount(1);
+      await expect(page.locator('link[rel="preload"][as="image"]')).toHaveCount(expectedPriority);
+      await expect(page.locator('img[fetchpriority="high"], img[loading="eager"]')).toHaveCount(
+        expectedPriority,
+      );
     });
 
     for (const width of [375, 1440]) {
@@ -148,6 +158,11 @@ for (const brand of brands) {
         await page.goto(path);
         // Mesures avec les polices du site, pas celles de repli.
         await expect(page.locator("main [data-product-card]")).toHaveCount(expected.length);
+        const compareButton = page
+          .locator(`main [data-product-card="${expected[0]!.code}"]`)
+          .getByRole("button", { name: /au comparateur/i });
+        await expect(compareButton).toBeVisible();
+        await expect(compareButton).toHaveText("VS");
         await page.evaluate(() => document.fonts.ready);
         const cards = await page.locator("main [data-product-card]").evaluateAll((els) =>
           els.map((card) => {
@@ -283,7 +298,7 @@ test.describe("chaque lien « Samsung » mène à /marques/samsung", () => {
   test("nom de marque d'une fiche Samsung", async ({ page }) => {
     const product = products.find((p) => p.brand_slug === "samsung")!;
     await page.goto(`/produit/${product.slug}`);
-    await page.getByRole("main").getByRole("link", { name: "Samsung", exact: true }).click();
+    await page.locator('main a[data-brand="samsung"]').click();
     await expectSamsungPage(page);
   });
 
@@ -436,6 +451,10 @@ for (const reducedMotion of ["reduce", "no-preference"] as const) {
   test(`Maj+Tab dans les sections : aucun lien sous la barre collante (WCAG 2.4.11, mouvement ${reducedMotion})`, async ({
     page,
   }) => {
+    // Une remontée au clavier par contrôle de carte (≈ 2 par produit, 31 pour Samsung), avec un
+    // défilement doux attendu à chaque pas : la durée croît avec le catalogue, pas le temps de
+    // chaque étape.
+    test.setTimeout(120_000);
     await page.emulateMedia({ reducedMotion });
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto("/marques/samsung");
@@ -443,9 +462,11 @@ for (const reducedMotion of ["reduce", "no-preference"] as const) {
     // Départ : premier lien après les sections (« Comparer avec »), puis remontée au clavier.
     await page.getByRole("region", { name: "Comparer avec" }).getByRole("link").first().focus();
     await scrollSettled(page);
-    const cards = await page.locator("main [data-product-card]").count();
+    const cardControls = await page
+      .locator("main [data-product-card] a:visible, main [data-product-card] button:visible")
+      .count();
     let checked = 0;
-    for (let step = 0; step < cards + 2; step += 1) {
+    for (let step = 0; step < cardControls + 2; step += 1) {
       await page.keyboard.press("Shift+Tab");
       await scrollSettled(page);
       const focused = page.locator(":focus");
@@ -457,6 +478,6 @@ for (const reducedMotion of ["reduce", "no-preference"] as const) {
       expect(box.y + box.height, `lien ${step} hors de l'écran`).toBeLessThanOrEqual(900);
       checked += 1;
     }
-    expect(checked).toBe(cards);
+    expect(checked).toBe(cardControls);
   });
 }
