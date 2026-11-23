@@ -16,6 +16,10 @@ const optional = <T extends z.ZodType>(schema: T) =>
 export const envSchema = z
   .object({
     NEXT_PUBLIC_SITE_URL: optional(z.url({ protocol: /^https?$/ })),
+    NEXT_PUBLIC_SUPABASE_URL: optional(z.url({ protocol: /^https?$/ })),
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: optional(
+      z.string().regex(/^sb_publishable_[A-Za-z0-9_-]+$/),
+    ),
     ALLOW_INDEXING: z.preprocess(
       (value) => (value === "" ? undefined : value),
       z.enum(["true", "false"]).default("false"),

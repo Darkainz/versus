@@ -35,6 +35,21 @@ describe("parseEnv", () => {
     expect(env.ALLOW_INDEXING).toBe("false");
   });
 
+  it("valide les variables publiques Supabase lorsqu'elles sont fournies", () => {
+    expect(() =>
+      parseEnv({
+        NEXT_PUBLIC_SUPABASE_URL: "http://127.0.0.1:54321",
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "sb_publishable_test-key",
+      }),
+    ).not.toThrow();
+    expect(() =>
+      parseEnv({
+        NEXT_PUBLIC_SUPABASE_URL: "not-an-url",
+        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "service_role",
+      }),
+    ).toThrow();
+  });
+
   it("exige NEXT_PUBLIC_SITE_URL en production", () => {
     expect(() => parseEnv({ VERCEL_ENV: "production" })).toThrow(/NEXT_PUBLIC_SITE_URL/);
   });

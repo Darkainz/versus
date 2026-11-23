@@ -1,9 +1,21 @@
 import type { NextConfig } from "next";
 
+let remotePatterns: URL[] = [];
+if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  try {
+    remotePatterns = [
+      new URL(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/product-images/**`),
+    ];
+  } catch {
+    remotePatterns = [];
+  }
+}
+
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   images: {
+    remotePatterns,
     // AVIF d'abord, WebP sinon (refonte, lot 1) : l'optimiseur choisit selon l'en-tête Accept,
     // le PNG source reste servi aux navigateurs qui n'acceptent ni l'un ni l'autre.
     formats: ["image/avif", "image/webp"],
