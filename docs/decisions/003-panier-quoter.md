@@ -1,6 +1,6 @@
 # ADR 003 : panier local, devis serveur (`CartQuoter`) et passage à Supabase
 
-- **Statut** : accepté pour le catalogue statique ; le passage à Supabase reste à faire (étape 4)
+- **Statut** : accepté ; le calcul passe par Supabase dès que les variables publiques sont configurées
 - **Date** : 18 novembre 2026 (étape 5 avancée sur la branche `panier`)
 - **Référence** : `docs/PLAN.md`, §1.2 (principes), §5.6 et §5.8 (« le serveur fait foi »), §6
   étapes 4 et 5 ; refonte, règle 4 de la direction
@@ -27,12 +27,12 @@ Il fallait donc :
 montants `_fcfa` entiers, `issues` par ligne : `unavailable`, `insufficient_stock`, `qty_capped`,
 `price_changed`) et l'interface `CartQuoter` : `quote(items, zoneCode)` et `listZones()`.
 
-- Aujourd'hui : `staticCartQuoter` (`static-quoter.ts`) appelle `computeQuote()` sur le catalogue
-  statique et lit les zones de `config/policies.ts` (décision D6).
-- À l'étape 4 : un adaptateur appellera `supabase.rpc("quote_cart", …)` et lira la table
-  `delivery_zones`. **Seul `src/lib/cart/quoter.ts` change** : la Server Action `priceCart`, la
-  page `/panier` (zones lues côté serveur par `getDeliveryZones()` → `listZones()`) et les
-  composants restent identiques.
+- Sans variables Supabase : `staticCartQuoter` (`static-quoter.ts`) appelle `computeQuote()` sur
+  le catalogue local et les zones de `config/policies.ts`, pour permettre le développement isolé.
+- Avec Supabase configuré : `supabaseCartQuoter` appelle `supabase.rpc("quote_cart", …)` et lit
+  la table `delivery_zones`. `src/lib/cart/quoter.ts` sélectionne l'adaptateur ; la Server Action
+  `priceCart`, la page `/panier` (zones lues côté serveur par `getDeliveryZones()` →
+  `listZones()`) et les composants restent identiques.
 - `computeQuote()` reste la référence testée du calcul ; les tests de la RPC (pgTAP) reprendront
   ses cas.
 - Champs d'affichage du contrat, lus par la même requête : `zone_label` et `eta_label`
@@ -77,6 +77,5 @@ bouton « Commander ».
 - Le JavaScript de `/` et des fiches reste sous 150 Ko (152 592 octets mesurés). Celui de
   `/panier` le dépasse (environ 156,6 Ko) : le plan ne fixe pas de seuil pour cette page, la mesure
   est suivie dans `docs/audits/budget.md`.
-- Au passage à Supabase : remplacer l'implémentation de `quoter.ts`, garder `computeQuote()` comme
-  oracle de tests, et vérifier que `delivery_zones` renvoie les mêmes six zones que
-  `deliveryZoneOptions`.
+- `computeQuote()` reste l'oracle de tests de la fonction SQL ; les six zones de la table gardent
+  les mêmes libellés, délais et tarifs que `deliveryZoneOptions`.

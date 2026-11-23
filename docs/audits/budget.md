@@ -103,6 +103,42 @@ pas compté. Le socle du framework pèse environ 135 Ko ; le code de l'applicati
 4. **Îlots minimaux** : diapositives (`HeroSlide`), cartes (`ProductCard`) et tableaux du
    comparateur rendus par le serveur et passés en `children` ou en props aux îlots client.
 
+## Contrôle du 22 novembre 2026
+
+Après l'ajout du quiz et des liens associés, le contrôle mesurait 153 822 octets sur `/` et les
+pages marque, et 156 451 octets sur `/produit/iphone-18-pro`. En plus des liens de cartes déjà
+traités, plusieurs liens visibles pendant le défilement préchargeaient le JavaScript des routes
+cibles : logo, fil d'Ariane, liens du rail de produits, actions de marque du hero et raccourcis
+des pages marque.
+
+Ces liens désactivent maintenant le préchargement Next.js (`prefetch={false}`) : leurs scripts ne
+sont demandés qu'à la navigation. Aucun seuil ni comportement de route n'a été changé. Le contrôle
+`e2e/budget.spec.ts` passe de nouveau : **7 tests réussis**, incluant les seuils JavaScript stricts
+de 150 Ko et le transfert total sous 1 Mo.
+
+## Correction après les tests E2E
+
+Les nouveaux parcours publics (compte et synchronisation du panier) avaient fait dépasser le seuil
+de 150 Ko. Le seuil est conservé :
+
+- `Button`, `TextLink` et `NavLink` désactivent le préchargement par défaut ; une navigation au clic
+  reste inchangée ;
+- le menu mobile charge son dialogue et son code de gestion du focus à la première ouverture ;
+- la synchronisation du panier est intégrée au bouton panier déjà présent dans l'en-tête, sans
+  frontière client supplémentaire.
+
+Mesure sur le build de production, Chromium, contexte neuf, 1440 × 900 px et défilement complet
+(même procédure que `e2e/budget.spec.ts`) :
+
+| Page                     | JavaScript transféré | Total transféré |
+| ------------------------ | -------------------: | --------------: |
+| `/`                      |        **153 303 o** |       432 719 o |
+| `/produit/iphone-18-pro` |        **152 877 o** |       292 516 o |
+| `/marques/samsung`       |        **151 525 o** |       347 328 o |
+
+Les trois pages respectent le seuil strict de **153 600 octets** ; les tests du transfert total
+restent sous 1 Mo.
+
 ## Diagnostiquer un dépassement
 
 ```bash
