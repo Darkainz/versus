@@ -14,7 +14,7 @@ import { CART_STORAGE_KEY, parseStoredCart, writeStoredCart, type WriteError } f
  * Avertissement à afficher : données réparées (`repaired`) ou vidées (`reset`) à la lecture,
  * stockage plein (`quota`) ou indisponible (`unavailable`) à l'écriture.
  */
-export type CartNotice = "repaired" | "reset" | WriteError;
+export type CartNotice = "repaired" | "reset" | "sync-error" | "sync-overflow" | WriteError;
 
 export type CartSnapshot = {
   lines: readonly CartLine[];
@@ -97,4 +97,26 @@ export function updateCart(action: CartAction): CartSnapshot {
 /** Zone de livraison choisie sur la page panier (code de `delivery_zones`, ou `null`). */
 export function setCartZone(zone: string | null): CartSnapshot {
   return commit(getCartSnapshot().lines, zone);
+}
+
+export function replaceCartLines(lines: readonly CartLine[]): CartSnapshot {
+  const current = getCartSnapshot();
+  if (
+    lines.length === current.lines.length &&
+    lines.every((line, index) => {
+      const currentLine = current.lines[index];
+      return currentLine?.sku === line.sku && currentLine.qty === line.qty;
+    })
+  ) {
+    return current;
+  }
+  return commit(lines, current.zone);
+}
+
+export function setCartNotice(notice: CartNotice | null): CartSnapshot {
+  const current = getCartSnapshot();
+  if (current.notice === notice) return current;
+  snapshot = make(current.lines, current.zone, notice);
+  emit();
+  return snapshot;
 }

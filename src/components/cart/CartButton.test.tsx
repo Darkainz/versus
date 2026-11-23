@@ -5,6 +5,7 @@ import { CartButton } from "./CartButton";
 
 const navigation = vi.hoisted(() => ({ pathname: "/" }));
 vi.mock("next/navigation", () => ({ usePathname: () => navigation.pathname }));
+vi.mock("@/server/actions/cart", () => ({ syncCart: vi.fn() }));
 
 beforeEach(() => {
   navigation.pathname = "/";

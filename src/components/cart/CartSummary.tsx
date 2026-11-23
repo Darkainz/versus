@@ -3,6 +3,7 @@ import { Price } from "@/components/ui/Price";
 import { articles } from "@/lib/cart/cart-messages";
 import type { DeliveryZoneOption } from "@/config/policies";
 import type { CartQuote } from "@/lib/cart/quote";
+import { amountUntilFreeDelivery } from "@/lib/delivery/fees";
 import { formatFCFA } from "@/lib/format/fcfa";
 
 /**
@@ -26,8 +27,8 @@ export function CartSummary({
   zoneOption?: DeliveryZoneOption;
 }) {
   const missing =
-    quote && zoneOption?.free_from_fcfa != null && quote.zone_code === zoneOption.code
-      ? zoneOption.free_from_fcfa - quote.subtotal_fcfa
+    quote && quote.zone_code === zoneOption?.code
+      ? amountUntilFreeDelivery(quote.subtotal_fcfa, zoneOption)
       : 0;
   const zone = quote?.zone_code
     ? [quote.zone_label, quote.eta_label].filter(Boolean).join(" · ")
