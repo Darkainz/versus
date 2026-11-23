@@ -1,4 +1,5 @@
 import type { Brand, DeviceKind } from "@/lib/brand-themes";
+import { additionalPhotos } from "./additional-photos";
 import type { CategorySlug, CompareGroup, ProductDetail, ProductSpecs } from "@/lib/catalog/types";
 
 type Candidate = {
@@ -892,6 +893,7 @@ export const additionalProducts: readonly ProductDetail[] = candidates.map((cand
       "Caractéristiques issues de la fiche officielle ; prix indicatif estimé pour ce projet pédagogique.",
   };
   const category = categoryDetails[candidate.category];
+  const photo = additionalPhotos[code] ?? null;
   const visualKind: DeviceKind =
     candidate.category === "montres" &&
     (candidate.brand === "samsung" ||
@@ -925,10 +927,10 @@ export const additionalProducts: readonly ProductDetail[] = candidates.map((cand
     min_price_fcfa: candidate.price,
     max_price_fcfa: candidate.price,
     in_stock: true,
-    image_src: null,
-    image_width: null,
-    image_height: null,
-    image_alt: null,
+    image_src: photo ? `/products/${code}.png` : null,
+    image_width: photo?.width ?? null,
+    image_height: photo?.height ?? null,
+    image_alt: photo?.alt ?? null,
     variants: [
       {
         sku: `${code.toUpperCase()}-DEM`,
