@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { siteUrl } from "@/lib/env";
+import { breadcrumbJsonLd } from "@/lib/json-ld";
 
 export type BreadcrumbItem = { label: string; href?: string | null };
 
@@ -6,11 +9,12 @@ export type BreadcrumbItem = { label: string; href?: string | null };
  * Fil d'Ariane (§4.7 du plan de refonte) : « Accueil › Samsung ». Les étapes avec `href` sont
  * des liens de 44 px de haut ; la dernière (la page affichée) est un texte, sans lien ni
  * `aria-current` : l'en-tête porte déjà le seul « page courante » de la page (lot 3). Le
- * séparateur « › » est décoratif.
+ * séparateur « › » est décoratif. Publie aussi le `BreadcrumbList` JSON-LD (étape 9).
  */
 export function Breadcrumb({ items }: { items: readonly BreadcrumbItem[] }) {
   return (
     <nav aria-label="Fil d’Ariane" className="text-sm">
+      <JsonLd data={breadcrumbJsonLd(items, siteUrl)} />
       <ol className="flex flex-wrap items-center gap-x-2 text-muted-strong">
         {items.map((item, index) => (
           <li key={item.label} className="flex min-h-11 items-center gap-2">
