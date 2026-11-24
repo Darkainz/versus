@@ -286,6 +286,9 @@
  * Tailwind travaille en border-box : 1288 px de largeur totale redonnent les mêmes positions.
  */
 @utility wrap {
+  /* Largeur explicite : avec des marges automatiques, un enfant de colonne flex (<main>) n'est plus
+     étiré et prend la largeur de son contenu, d'où un débordement (comparateur à 768 px). */
+  width: 100%;
   max-width: 1288px;
   margin-inline: auto;
   padding-inline: var(--gutter);
