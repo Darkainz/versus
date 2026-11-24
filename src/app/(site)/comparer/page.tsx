@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { CompareFamilies, type CompareFamily } from "@/components/home/CompareFamilies";
 import { CompareCanonicalizer } from "@/components/compare/CompareCanonicalizer";
@@ -14,6 +15,8 @@ const groupLabels: Record<CompareGroup, string> = {
   audio: "Écouteurs",
   wearables: "Montres et bracelets",
 };
+
+export const metadata: Metadata = { title: "Comparer" };
 
 type CompareSearchParams = {
   p?: string | string[];

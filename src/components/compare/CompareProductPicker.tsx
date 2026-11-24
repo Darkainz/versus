@@ -64,15 +64,17 @@ export function CompareProductPicker({
         Choisir les modèles à comparer
       </summary>
       <form onSubmit={submit} className="mt-4">
-        <fieldset className="grid gap-4 sm:grid-cols-3">
+        <fieldset className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-3">
           <legend className="sr-only">Modèles du comparateur</legend>
           {[0, 1, 2].map((index) => (
-            <label key={index} className="grid gap-2 text-sm font-medium">
+            <label key={index} className="grid min-w-0 grid-cols-1 gap-2 text-sm font-medium">
               Modèle {index + 1}
               <select
                 value={codes[index] ?? ""}
                 onChange={(event) => choose(index, event.currentTarget.value)}
-                className="min-h-11 rounded-control border border-line-control bg-bg px-3 text-ink"
+                // w-full min-w-0 : sans cela, la largeur intrinsèque des options (352 px) élargit la grille et
+                // fait déborder la page à 768 px et rogne les sélecteurs à 360 px.
+                className="min-h-11 w-full max-w-full min-w-0 rounded-control border border-line-control bg-bg px-3 text-ink"
               >
                 <option value="">Aucun</option>
                 {options.map((product) => (

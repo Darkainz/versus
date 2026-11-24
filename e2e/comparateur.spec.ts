@@ -83,4 +83,29 @@ test.describe("comparateur", () => {
     );
     await page.getByRole("button", { name: "Fermer" }).click();
   });
+  test("a un titre de page propre", async ({ page }) => {
+    await page.goto("/comparer");
+    await expect(page).toHaveTitle("Comparer | VERSUS");
+  });
+
+  // Régression : les options longues des sélecteurs (352 px) élargissaient la grille, d'où un
+  // défilement horizontal de 16 px à 768 px et des sélecteurs rognés à 360 px.
+  for (const width of [360, 390, 768, 1024]) {
+    test(`le sélecteur de modèles reste dans la page à ${width} px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto("/comparer");
+      // Un sélecteur par famille de produits : seul celui de la famille affichée est visible.
+      await page.locator("summary:visible", { hasText: "Choisir les modèles à comparer" }).click();
+      await expect(page.getByLabel("Modèle 1").locator("visible=true")).toBeVisible();
+      const state = await page.evaluate(() => ({
+        overflow: document.documentElement.scrollWidth - window.innerWidth,
+        rights: [...document.querySelectorAll("select")]
+          .filter((select) => select.getClientRects().length > 0)
+          .map((select) => Math.round(select.getBoundingClientRect().right)),
+      }));
+      expect(state.overflow, JSON.stringify(state)).toBeLessThanOrEqual(0);
+      for (const right of state.rights)
+        expect(right, JSON.stringify(state)).toBeLessThanOrEqual(width);
+    });
+  }
 });
