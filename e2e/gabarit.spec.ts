@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
+import { routeFor } from "../src/config/site";
 
 /**
  * Gabarit global : landmarks, menu mobile au clavier, absence de défilement
@@ -18,6 +19,8 @@ const PAGES = [
   "/cgv",
   "/livraison",
   "/garantie",
+  "/commande",
+  "/suivi",
   "/styleguide",
 ];
 
@@ -25,7 +28,12 @@ async function blockingViolations(page: Page) {
   const results = await new AxeBuilder({ page }).analyze();
   return results.violations
     .filter((v) => v.impact === "serious" || v.impact === "critical")
-    .map((v) => `${v.id} : ${v.help} (${v.nodes.length})`);
+    .map(
+      (v) =>
+        `${v.id} : ${v.help} (${v.nodes
+          .map((node) => `${node.target.join(" ")}: ${node.failureSummary}`)
+          .join("; ")})`,
+    );
 }
 
 /** Règle axe `region` (impact modéré) : tout le contenu visible est dans un landmark. */
@@ -68,14 +76,15 @@ test.describe("landmarks", () => {
 });
 
 test.describe("en-tête", () => {
-  test("les icônes non livrées sont absentes, le panier et les marques sont accessibles", async ({
-    page,
-  }) => {
+  test("les actions livrées, le panier et les marques sont accessibles", async ({ page }) => {
     await page.goto("/");
     const header = page.getByRole("banner");
-    for (const name of ["Rechercher", "Comparateur", "Mon compte"]) {
-      await expect(header.getByRole("link", { name })).toHaveCount(0);
-      await expect(header.getByRole("button", { name })).toHaveCount(0);
+    for (const [name, route] of [
+      ["Rechercher", "recherche"],
+      ["Comparateur", "comparer"],
+      ["Mon compte", "compte"],
+    ] as const) {
+      await expect(header.getByRole("link", { name })).toHaveAttribute("href", routeFor(route)!);
     }
     await expect(header.getByRole("button", { name: "Panier" })).toHaveAttribute(
       "aria-haspopup",
@@ -95,11 +104,11 @@ test.describe("en-tête", () => {
       "href",
       "/boutique#smartphones",
     );
-    // routeFor("comparerAccueil") : la section de l'accueil, jusqu'à /comparer (étape 5).
-    await expect(page.getByRole("link", { name: "Comparer", exact: true })).toHaveAttribute(
-      "href",
-      "/#comparer",
-    );
+    // Le lien « Comparer » du hero a été retiré de l'accueil (décision du 23/11) : l'accès au
+    // comparateur passe par l'en-tête (« Comparateur », vérifié plus haut).
+    await expect(
+      page.locator(".hero-slide-active").getByRole("link", { name: "Comparer", exact: true }),
+    ).toHaveCount(0);
     await expect(page.locator('a[href="#"]')).toHaveCount(0);
   });
 
@@ -119,11 +128,16 @@ test.describe("menu mobile à 375 px", () => {
     await expect(button).toBeVisible();
     await expect(button).toHaveAttribute("aria-expanded", "false");
 
-    // Atteindre le bouton au clavier : lien d'évitement, logo, panier, puis menu.
-    await page.keyboard.press("Tab");
-    await page.keyboard.press("Tab");
-    await page.keyboard.press("Tab");
-    await page.keyboard.press("Tab");
+    // Atteindre le bouton au clavier sans supposer le nombre d'actions de l'en-tête.
+    let reachedMenu = false;
+    for (let tab = 0; tab < 12; tab += 1) {
+      await page.keyboard.press("Tab");
+      if (await button.evaluate((element) => element === document.activeElement)) {
+        reachedMenu = true;
+        break;
+      }
+    }
+    expect(reachedMenu).toBe(true);
     await expect(button).toBeFocused();
     await page.keyboard.press("Enter");
 
@@ -225,7 +239,7 @@ test.describe("redistribution à 320 px (1280 px zoomés à 400 %, WCAG 1.4.10)"
     test(`pas de défilement horizontal sur ${path}`, async ({ page }) => {
       await page.goto(path);
       const overflow = await page.evaluate(
-        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        () => document.documentElement.scrollWidth - window.innerWidth,
       );
       expect(overflow).toBeLessThanOrEqual(0);
     });

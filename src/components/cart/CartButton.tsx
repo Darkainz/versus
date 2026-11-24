@@ -1,11 +1,13 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useRef, useState, type ComponentType, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ComponentType, type ReactNode } from "react";
 import { CountBadge } from "@/components/ui/CountBadge";
 import { countLabel } from "@/components/ui/count-label";
 import { iconButtonClasses } from "@/components/ui/icon-button-styles";
+import { getCartSnapshot, replaceCartLines, setCartNotice } from "@/lib/cart/cart-store";
 import { useCart } from "@/lib/cart/use-cart";
+import { syncCart } from "@/server/actions/cart";
 import type { CartDrawerProps } from "./CartDrawer";
 
 /** Le tiroir n'est téléchargé qu'à la première ouverture (ou au survol) : budget JavaScript. */
@@ -33,10 +35,67 @@ export function CartButton({
   icon: ReactNode;
 }) {
   const cart = useCart();
-  const onCartPage = usePathname() === href;
+  const cartLines = cart?.lines;
+  const pathname = usePathname();
+  const currentUserId = useRef<string | null>(null);
+  const queue = useRef<Promise<void>>(Promise.resolve());
+  const onCartPage = pathname === href;
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [Drawer, setDrawer] = useState<ComponentType<CartDrawerProps> | null>(null);
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!cartLines) return;
+    let active = true;
+    const observedLines = cartLines;
+    const submittedLines = observedLines.map(({ sku, qty }) => ({ sku, qty }));
+
+    queue.current = queue.current
+      .then(async () => {
+        const result = await syncCart(
+          submittedLines,
+          currentUserId.current ? "replace" : "merge",
+          currentUserId.current,
+        );
+        if (!active) return;
+        if (result.status === "anonymous") {
+          currentUserId.current = null;
+          const notice = getCartSnapshot().notice;
+          if (notice === "sync-error" || notice === "sync-overflow") setCartNotice(null);
+          return;
+        }
+        if (result.status === "overflow") {
+          setCartNotice("sync-overflow");
+          return;
+        }
+        if (result.status === "error") {
+          setCartNotice("sync-error");
+          return;
+        }
+        currentUserId.current = result.userId;
+        const snapshotBeforeSync = getCartSnapshot();
+        if (snapshotBeforeSync.lines === observedLines) replaceCartLines(result.lines);
+        const noticeAfterSync = getCartSnapshot().notice;
+        if (
+          (snapshotBeforeSync.notice === "repaired" || snapshotBeforeSync.notice === "reset") &&
+          noticeAfterSync !== "quota" &&
+          noticeAfterSync !== "unavailable"
+        ) {
+          setCartNotice(snapshotBeforeSync.notice);
+        } else if (noticeAfterSync === "sync-error" || noticeAfterSync === "sync-overflow") {
+          setCartNotice(null);
+        }
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        console.error("La synchronisation du panier a échoué.", error);
+        setCartNotice("sync-error");
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [cartLines, pathname]);
 
   if (!cart) {
     return (

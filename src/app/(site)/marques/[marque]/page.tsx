@@ -74,7 +74,7 @@ export default async function BrandPage({ params }: PageProps<"/marques/[marque]
     ),
   );
   const others = otherBrands(brands, brand.slug);
-  const compareHref = routeFor("comparer") ?? routeFor("comparerAccueil");
+  const compareHref = routeFor("comparer");
   const shortcuts = compareShortcuts(
     home.compare.map((entry) => entry.product),
     brand.slug,

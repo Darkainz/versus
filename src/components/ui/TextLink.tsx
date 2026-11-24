@@ -31,12 +31,14 @@ type TextLinkProps = Omit<ComponentProps<typeof Link>, "className" | "children">
 export function TextLink({
   tone = "accent",
   arrow = false,
+  prefetch = false,
   className,
   children,
   ...rest
 }: TextLinkProps) {
   return (
     <Link
+      prefetch={prefetch}
       className={clsx(
         "inline-flex min-h-11 items-center gap-1.5 text-[15px] font-semibold transition-colors duration-(--dur-base)",
         tones[tone],

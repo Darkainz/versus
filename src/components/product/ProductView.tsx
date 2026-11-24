@@ -1,6 +1,7 @@
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { BrandMark } from "@/components/ui/BrandMark";
 import { Price } from "@/components/ui/Price";
+import { CompareButton } from "@/components/compare/CompareButton";
 import { buttonClasses } from "@/components/ui/button-styles";
 import { brandHref, routeFor, site } from "@/config/site";
 import type { ProductDetail } from "@/lib/catalog/types";
@@ -79,9 +80,7 @@ export function ProductView({
               "Prix indisponible"
             )}
           </p>
-          <p className="mt-2 text-sm text-muted">
-            {site.payments.join(" · ")} (simulés)
-          </p>
+          <p className="mt-2 text-sm text-muted">{site.payments.join(" · ")} (simulés)</p>
           <p className="mt-2 text-sm text-muted">
             Garantie indiquée : {product.warranty_months} mois
           </p>
@@ -96,6 +95,7 @@ export function ProductView({
               }))}
             />
           ) : null}
+          <CompareButton product={product} className="mt-4 w-full sm:w-auto" />
           <h2 className="mt-8 text-base font-bold">Caractéristiques</h2>
           <dl className="mt-3 grid grid-cols-2 gap-4 border-t border-line-soft pt-4">
             {specs.map((row) => (

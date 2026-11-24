@@ -2,7 +2,7 @@ import { ProductVisual } from "@/components/product/ProductVisual";
 import { BrandMark } from "@/components/ui/BrandMark";
 import { Button } from "@/components/ui/Button";
 import { Price } from "@/components/ui/Price";
-import { brandHref, productHref, routeFor } from "@/config/site";
+import { brandHref, productHref } from "@/config/site";
 import { brandThemes } from "@/lib/brand-themes";
 import type { HomeEntry } from "@/lib/catalog/types";
 import { seeLabel } from "@/lib/format/see-label";
@@ -13,7 +13,7 @@ import { seeLabel } from "@/lib/format/see-label";
  * - pastille de marque cliquable au-dessus du titre (page de la marque) ;
  * - prix grand juste après le nom (`<Price size="lead">` : 22 px, 28 px dès 641 px, « Dès ») ;
  * - deux actions : « Voir l'iPhone 18 Pro » (bouton vert, la fiche) et « Tout Apple » (la page
- *   de la marque), plus « Comparer » en lien discret vers le comparateur de l'accueil.
+ *   de la marque). La comparaison complète reste au menu.
  * Le badge « Nouveau » est retiré des diapositives (§4.5).
  */
 export function HeroSlide({
@@ -25,7 +25,6 @@ export function HeroSlide({
   tone: "dark" | "light";
   priority: boolean;
 }) {
-  const compareHref = routeFor("comparerAccueil");
   const brandPage = brandHref(product.brand_slug);
   const name = headline ?? product.name;
 
@@ -50,18 +49,23 @@ export function HeroSlide({
           </p>
         ) : null}
         <div className="hero-cta">
-          <Button href={productHref(product.slug)} variant="primary" size="lg">
+          <Button href={productHref(product.slug)} prefetch={false} variant="primary" size="lg">
             {seeLabel(product.name)}
           </Button>
           {brandPage ? (
-            <Button href={brandPage} variant={tone === "dark" ? "onDark" : "secondary"} size="lg">
+            <Button
+              href={brandPage}
+              prefetch={false}
+              variant={tone === "dark" ? "onDark" : "secondary"}
+              size="lg"
+              className={
+                tone === "light"
+                  ? "!bg-white/85 state-hover:bg-white !border-ink text-ink shadow-sm"
+                  : undefined
+              }
+            >
               Tout {brandThemes[product.brand_slug].label}
             </Button>
-          ) : null}
-          {compareHref ? (
-            <a className="hero-compare-link" href={compareHref}>
-              Comparer
-            </a>
           ) : null}
         </div>
       </div>

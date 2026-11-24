@@ -69,19 +69,26 @@ test("les visuels produits du hero et de la boutique sont chargés", async ({ pa
     .toBeGreaterThan(0);
 
   await page.goto("/boutique");
+  // Toutes les cartes sont affichées ; seuls les produits avec photo ont un <img>, les autres
+  // montrent le SVG de secours (`FallbackVisual`) : les comptes viennent du catalogue.
+  const withPhoto = products.filter(
+    (product) => product.image_src && product.image_width && product.image_height,
+  );
+  await expect(page.locator("[data-product-card]")).toHaveCount(products.length);
   const images = page.locator("[data-product] img");
-  await expect(images).toHaveCount(products.length);
-  const height = await page.locator("body").evaluate((body) => body.scrollHeight);
-  for (let y = 0; y < height; y += 650) {
-    await page.evaluate((top) => window.scrollTo(0, top), y);
-    await page.waitForTimeout(100);
-  }
+  await expect(images).toHaveCount(withPhoto.length);
+  await images.evaluateAll((elements) => {
+    for (const element of elements) (element as HTMLImageElement).loading = "eager";
+  });
+  await page.waitForLoadState("networkidle");
   await expect
-    .poll(() =>
-      images.evaluateAll(
-        (elements) =>
-          elements.filter((element) => (element as HTMLImageElement).naturalWidth === 0).length,
-      ),
+    .poll(
+      () =>
+        images.evaluateAll(
+          (elements) =>
+            elements.filter((element) => (element as HTMLImageElement).naturalWidth === 0).length,
+        ),
+      { timeout: 15_000 },
     )
     .toBe(0);
 });

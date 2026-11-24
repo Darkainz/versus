@@ -1,9 +1,14 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { HeroRotator, type HeroRotatorSlide } from "./HeroRotator";
 
-const icons = { previous: "‹", next: "›" };
+afterEach(() => {
+  vi.useRealTimers();
+  vi.unstubAllGlobals();
+});
+
+const icons = { previous: "‹", next: "›", play: "play", pause: "pause" };
 const slides: HeroRotatorSlide[] = ["ip18", "s26u", "x17u"].map((key) => ({
   key,
   name: `Produit ${key}`,
@@ -28,6 +33,24 @@ function activeSlide() {
 function groups() {
   return Array.from(document.querySelectorAll<HTMLElement>("[aria-roledescription='diapositive']"));
 }
+
+function setReducedMotion(matches: boolean) {
+  vi.stubGlobal("matchMedia", () => ({
+    matches,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }));
+}
+
+const visibilityStateDescriptor = Object.getOwnPropertyDescriptor(document, "visibilityState");
+
+afterEach(() => {
+  if (visibilityStateDescriptor) {
+    Object.defineProperty(document, "visibilityState", visibilityStateDescriptor);
+  } else {
+    Reflect.deleteProperty(document, "visibilityState");
+  }
+});
 
 describe("HeroRotator", () => {
   it("expose chaque diapositive comme un groupe « n sur N » dans un carrousel nommé", () => {
@@ -56,12 +79,78 @@ describe("HeroRotator", () => {
     expect(screen.getAllByRole("link").map((link) => link.textContent)).toEqual(["Voir ip18"]);
   });
 
-  it("ne tourne jamais seul et annonce poliment les changements manuels", () => {
+  it("avance automatiquement et n'annonce pas les changements automatiques", () => {
+    setReducedMotion(false);
+    vi.useFakeTimers();
     render(<HeroRotator slides={slides} icons={icons} />);
-    expect(carousel().hasAttribute("data-manual")).toBe(true);
+    expect(carousel().hasAttribute("data-autoplay")).toBe(true);
+    expect(document.querySelector(".hero-slides")?.getAttribute("aria-live")).toBe("off");
+    expect(activeSlide()).toBe("ip18");
+
+    act(() => vi.advanceTimersByTime(6000));
+    expect(activeSlide()).toBe("s26u");
+  });
+
+  it("continue au survol et permet de suspendre puis reprendre avec le bouton", () => {
+    setReducedMotion(false);
+    vi.useFakeTimers();
+    render(<HeroRotator slides={slides} icons={icons} />);
+
+    fireEvent.mouseEnter(carousel());
+    act(() => vi.advanceTimersByTime(6000));
+    expect(activeSlide()).toBe("s26u");
+    expect(carousel().hasAttribute("data-paused")).toBe(false);
+
+    const pause = screen.getByRole("button", { name: "Mettre le défilement automatique en pause" });
+    fireEvent.click(pause);
+    expect(carousel().hasAttribute("data-paused")).toBe(true);
+    act(() => vi.advanceTimersByTime(6000));
+    expect(activeSlide()).toBe("s26u");
+
+    fireEvent.click(screen.getByRole("button", { name: "Reprendre le défilement automatique" }));
+    act(() => vi.advanceTimersByTime(6000));
+    expect(activeSlide()).toBe("x17u");
+  });
+
+  it("ne suspend pas la rotation lorsque le bouton lecture/pause reçoit le focus", () => {
+    setReducedMotion(false);
+    vi.useFakeTimers();
+    render(<HeroRotator slides={slides} icons={icons} />);
+
+    screen.getByRole("button", { name: "Mettre le défilement automatique en pause" }).focus();
+    act(() => vi.advanceTimersByTime(6000));
+    expect(activeSlide()).toBe("s26u");
+  });
+
+  it("suspend au focus et quand l'onglet est masqué", () => {
+    setReducedMotion(false);
+    vi.useFakeTimers();
+    render(<HeroRotator slides={slides} icons={icons} />);
+    const previous = screen.getByRole("button", { name: "Diapositive précédente" });
+
+    fireEvent.focus(previous);
+    act(() => vi.advanceTimersByTime(6000));
+    expect(activeSlide()).toBe("ip18");
+    expect(carousel().hasAttribute("data-paused")).toBe(true);
+
+    fireEvent.blur(previous, { relatedTarget: document.body });
+    Object.defineProperty(document, "visibilityState", { configurable: true, value: "hidden" });
+    fireEvent(document, new Event("visibilitychange"));
+    act(() => vi.advanceTimersByTime(6000));
+    expect(activeSlide()).toBe("ip18");
+
+    Object.defineProperty(document, "visibilityState", { configurable: true, value: "visible" });
+    fireEvent(document, new Event("visibilitychange"));
+    act(() => vi.advanceTimersByTime(6000));
+    expect(activeSlide()).toBe("s26u");
+  });
+
+  it("désactive la rotation sous mouvement réduit", () => {
+    setReducedMotion(true);
+    vi.useFakeTimers();
+    render(<HeroRotator slides={slides} icons={icons} />);
+    act(() => vi.advanceTimersByTime(6000));
     expect(carousel().hasAttribute("data-autoplay")).toBe(false);
-    expect(document.querySelector(".hero-slides")?.getAttribute("aria-live")).toBe("polite");
-    expect(screen.queryByRole("button", { name: /défilement/ })).toBeNull();
     expect(activeSlide()).toBe("ip18");
   });
 

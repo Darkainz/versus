@@ -111,3 +111,11 @@ export type HomeSlot = {
 export type HomeEntry = Omit<HomeSlot, "product_code" | "slot"> & { product: ProductDetail };
 
 export type HomeCatalog = Record<HomeSlotKind, HomeEntry[]>;
+
+export type DeliveryZone = {
+  code: string;
+  label: string;
+  fee_fcfa: number;
+  free_from_fcfa: number | null;
+  eta_label: string;
+};

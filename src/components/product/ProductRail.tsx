@@ -5,7 +5,7 @@ import { RailArrows } from "./RailArrows";
 
 export type RailItem = { key: string; brand: string; card: ReactNode };
 
-/** Lien d'en-tête pour une valeur du filtre (« Tout le catalogue (30) », « Voir les 10 produits Samsung »). */
+/** Lien d'en-tête pour une valeur du filtre, avec son nombre de produits calculé. */
 export type RailLink = { href: string; label: string };
 
 /** Une valeur du filtre : « all » (toutes les marques) ou le slug d'une marque. */
@@ -58,7 +58,7 @@ export function ProductRail({
           {heading}
           {linkEntries.map(([value, link]) => (
             <span key={value} data-rail-link={value}>
-              <TextLink href={link.href} arrow>
+              <TextLink href={link.href} prefetch={false} arrow>
                 {link.label}
               </TextLink>
             </span>

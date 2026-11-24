@@ -4,8 +4,8 @@ import type { Brand, DeviceKind } from "@/lib/brand-themes";
 /**
  * Contrat du devis de panier : celui de la RPC `public.quote_cart(p_items jsonb, p_zone_code text)`
  * (§5.8 du plan, ADR 003). Les noms suivent les colonnes de la base (`snake_case`, `_fcfa`).
- * Aujourd'hui, `static-quoter.ts` le calcule sur le catalogue statique ; à l'étape 4, la RPC
- * renverra exactement ce JSON et seul `quoter.ts` changera.
+ * `static-quoter.ts` conserve le calcul local ; quand Supabase est configuré, `supabase-quoter.ts`
+ * utilise la RPC `quote_cart` pour obtenir les prix, stocks, images et zones à jour.
  */
 
 /**
@@ -94,9 +94,8 @@ export type PriceCartResult =
   | { ok: false; code: QuoteErrorCode | "VS_UNAVAILABLE" };
 
 /**
- * Point d'accès unique au calcul du panier (côté serveur). Implémenté par `staticCartQuoter`
- * (catalogue statique) ; à l'étape 4, par un adaptateur de la RPC `quote_cart` et de la table
- * `delivery_zones`, sans toucher aux composants.
+ * Point d'accès unique au calcul du panier (côté serveur), implémenté par l'adaptateur statique
+ * ou par la RPC `quote_cart` et la table `delivery_zones` selon la configuration Supabase.
  */
 export interface CartQuoter {
   quote(items: readonly QuoteItem[], zoneCode: string | null): Promise<CartQuote>;

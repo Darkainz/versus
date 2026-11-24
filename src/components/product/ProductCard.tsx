@@ -73,7 +73,7 @@ export function ProductCard({
       )}
     >
       {wholeCard ? (
-        <Link className="product-card-whole-link" href={productHref(product.slug)}>
+        <Link className="product-card-whole-link" href={productHref(product.slug)} prefetch={false}>
           <ProductCardContent {...content} />
         </Link>
       ) : (

@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { CompareButton } from "@/components/compare/CompareButton";
 import { Button } from "@/components/ui/Button";
 import { NewBadge } from "@/components/ui/NewBadge";
 import { Price } from "@/components/ui/Price";
@@ -46,6 +47,9 @@ export function ProductCardContent({
           {product.brand_name}
         </span>
         {product.is_new ? <NewBadge /> : null}
+        {action && adaptive ? (
+          <CompareButton product={product} iconOnly className="size-11 px-0" />
+        ) : null}
       </div>
       <ProductVisual
         product={product}
@@ -65,7 +69,7 @@ export function ProductCardContent({
       />
       <h3
         className={clsx(
-          "mt-2 mb-1.5 font-display text-[21px] leading-[1.15] font-bold",
+          "mt-2 mb-1.5 line-clamp-2 font-display text-[21px] leading-[1.15] font-bold",
           adaptive && [compact.name, list.right, list.name],
           big && featuredClasses.name,
         )}
@@ -106,18 +110,22 @@ export function ProductCardContent({
         )}
       </p>
       {action ? (
-        <Button
-          href={productHref(product.slug)}
-          size="md"
-          className={clsx(
-            "w-full",
-            adaptive && [compact.button, list.right],
-            big && featuredClasses.button,
-          )}
-          aria-label={`${action} ${product.name}`}
-        >
-          {action}
-        </Button>
+        <>
+          <Button
+            href={productHref(product.slug)}
+            prefetch={false}
+            size="md"
+            className={clsx(
+              "w-full",
+              adaptive && [compact.button, list.right],
+              big && featuredClasses.button,
+            )}
+            aria-label={`${action} ${product.name}`}
+          >
+            {action}
+          </Button>
+          {!adaptive ? <CompareButton product={product} className="mt-2 w-full" /> : null}
+        </>
       ) : null}
     </>
   );

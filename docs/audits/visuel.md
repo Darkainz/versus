@@ -6,7 +6,9 @@
 - mouvement réduit (aucun défilement automatique, première diapositive) et
   `animations: "disabled"` ;
 - `VS_TODAY=2026-11-12`, fixé par `playwright.config.ts` (badges « Nouveau » stables) ;
-- polices chargées (`document.fonts.ready`) et toutes les images visibles décodées ;
+- polices chargées (`document.fonts.ready`) et images décodées ; le test des 30 visuels de la
+  boutique force leur chargement (`loading="eager"`) puis attend `networkidle`, afin de vérifier
+  aussi les images sous la ligne de flottaison ;
 - seuil : **0,5 % de pixels différents au plus** (`maxDiffPixelRatio: 0.005`), pour absorber
   l'anticrénelage du texte et des images redimensionnées d'une exécution à l'autre.
 
@@ -29,6 +31,12 @@ alignés sur les thèmes de marque, « Dès » retiré des cartes à prix unique
 structure de l'accueil est inchangée. **Une plateforme
 sans référence est ignorée** (test marqué `skipped`, avec le chemin attendu dans l'annotation) au
 lieu d'échouer : la CI Linux reste verte tant que ses références n'existent pas.
+
+Le 23 novembre 2026, après inspection des captures actuelles, les deux références Windows ont été
+actualisées : l'ancienne hauteur (5 303 px à 1440 px, 6 949 px à 390 px) ne comprenait pas la
+section « Besoin d'aide pour choisir ? » et les actions désormais livrées dans le comparateur.
+Le nouveau rendu (5 999 px et 8 138 px) a été vérifié avant mise à jour ; ces différences
+représentent les fonctionnalités livrées, pas une régression de mise en page.
 
 ## Générer les références Linux (CI)
 
@@ -59,3 +67,13 @@ npx playwright test e2e/visuel.spec.ts --update-snapshots=changed
 ```
 
 puis les faire relire avec le diff du commit.
+
+## Historique des régénérations
+
+- **2026-11-23** : références `win32` (`accueil-1440`, `accueil-390`) régénérées. Comparaison visuelle
+  de l'ancienne et de la nouvelle image : la mise en page est identique ; ne changent que les
+  données du catalogue étendu (compteurs des pastilles « Parcourir » 60 / 19 / 18 / 6, lien
+  « Tout le catalogue (103) », résumés des trois marques 32 / 31 / 40 produits, visuels de repli
+  SVG pour les produits Samsung et Xiaomi sans photo) et la disparition du badge de développement
+  de Next.js qui figurait par erreur dans l'ancienne référence. Les références Linux (CI) restent
+  à régénérer comme décrit plus haut.

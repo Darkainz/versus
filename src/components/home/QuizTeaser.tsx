@@ -1,19 +1,12 @@
 import { buttonClasses } from "@/components/ui/button-styles";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { routeFor } from "@/config/site";
-
-/** Question 1 du quiz (maquette) ; les valeurs suivent `compare_group` (§5.4). */
-const options = [
-  { value: "phones", label: "Un smartphone" },
-  { value: "audio", label: "Des écouteurs" },
-  { value: "wearables", label: "Une montre ou un bracelet" },
-] as const;
+import { quizTypes } from "@/lib/quiz/questions";
 
 /**
- * Aperçu du quiz d'aide au choix sur l'accueil (§4.5, écart E18) : la question 1 seule, en
- * formulaire GET vers `/aide-au-choix`, sans JavaScript. Composant prêt dès l'étape 3 mais rendu
- * seulement quand la route existe (étape 5) : `routeFor("aideAuChoix")` vaut `null` avant.
- * `preview` affiche le formulaire sans cible ni envoi possible (styleguide).
+ * Aperçu du quiz d'aide au choix : la question 1 seule, en formulaire GET vers `/aide-au-choix`,
+ * sans JavaScript. Le teaser n'est plus monté sur l'accueil depuis le 23 novembre 2026 ; `preview`
+ * affiche le formulaire sans cible ni envoi possible dans le styleguide.
  */
 export function QuizTeaser({ preview = false }: { preview?: boolean }) {
   const action = routeFor("aideAuChoix");
@@ -46,7 +39,7 @@ export function QuizTeaser({ preview = false }: { preview?: boolean }) {
             <legend className="mt-2 mb-6 text-[24px] leading-tight font-bold sm:text-[30px]">
               Que recherchez-vous ?
             </legend>
-            {options.map((option, index) => (
+            {quizTypes.map((option, index) => (
               <label
                 key={option.value}
                 className="mb-2.5 flex min-h-[58px] cursor-pointer items-center gap-3 rounded-option border border-on-dark/20 px-5 font-medium has-checked:border-on-dark"

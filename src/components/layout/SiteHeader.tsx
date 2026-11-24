@@ -29,18 +29,18 @@ const shopHref = routeFor("boutique");
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-header-line bg-header-bg md:bg-[var(--header-bg-translucent)] md:backdrop-blur-[20px] md:backdrop-saturate-[1.8]">
-      <div className="wrap flex h-[var(--header-height)] items-center justify-between gap-5">
+      <div className="wrap flex h-[var(--header-height)] items-center justify-between gap-5 max-[380px]:gap-2">
         <Logo />
         <MainNav groups={mainNav} />
         {shopHref ? (
           <NavLink
             href={shopHref}
-            className="hidden text-[13.5px] font-medium text-ink opacity-80 transition-opacity state-hover:opacity-100 aria-[current=page]:opacity-100 md:block"
+            className="hidden text-[13.5px] font-medium text-ink opacity-80 transition-opacity aria-[current=page]:opacity-100 md:block state-hover:opacity-100"
           >
             Tout le catalogue
           </NavLink>
         ) : null}
-        <div className="flex items-center gap-0.5">
+        <div className="flex items-center gap-0.5 max-[380px]:gap-0">
           {headerActions.map((action) =>
             action.key === "cart" ? (
               <CartButton
@@ -55,6 +55,8 @@ export function SiteHeader() {
                 href={action.href}
                 label={action.label}
                 icon={actionIcons[action.key]}
+                className={action.key === "compare" ? "max-[340px]:hidden" : undefined}
+                prefetch={false}
               />
             ),
           )}

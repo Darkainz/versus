@@ -31,11 +31,7 @@ export async function generateMetadata({
   };
 }
 
-export default function CategoryPage({
-  params,
-}: {
-  params: Promise<CategoryParams>;
-}) {
+export default function CategoryPage({ params }: { params: Promise<CategoryParams> }) {
   return (
     <Suspense fallback={<ProductGridSkeleton />}>
       <CategoryResults params={params} />
@@ -57,10 +53,7 @@ async function CategoryResults({ params }: { params: Promise<CategoryParams> }) 
   return (
     <div className="wrap py-14 sm:py-20">
       <Breadcrumb
-        items={[
-          { label: "Boutique", href: routeFor("boutique") },
-          { label: category.name },
-        ]}
+        items={[{ label: "Boutique", href: routeFor("boutique") }, { label: category.name }]}
       />
       <Eyebrow className="mt-8">{category.name}</Eyebrow>
       <h1 className="mt-3 text-display-h2">{category.name} VERSUS</h1>

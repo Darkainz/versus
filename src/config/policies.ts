@@ -1,9 +1,9 @@
 /**
  * Valeurs métier affichées par les pages d'information (livraison, CGV, garantie).
  *
- * Ce sont les propositions de la décision D6 du plan (à confirmer avant l'étape 6). À l'étape 6,
- * le serveur (Postgres) devient la source de vérité des frais : `lib/delivery/fees.ts` reprendra
- * ces valeurs pour l'estimation affichée, et ce fichier sera relu contre la base.
+ * Valeurs affichées par les pages d'information, alignées avec la décision D6. La base est la
+ * source de vérité des frais de commande ; `lib/delivery/fees.ts` n'est qu'un indicateur du restant
+ * avant gratuité calculé depuis le devis serveur.
  * Montants en FCFA entiers, affichés uniquement avec `formatFCFA()`.
  */
 

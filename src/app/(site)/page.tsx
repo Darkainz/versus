@@ -1,11 +1,9 @@
 import { Fragment } from "react";
 import { BrandCard } from "@/components/home/BrandCard";
 import { CategoryNav } from "@/components/home/CategoryNav";
-import { CompareShowcase } from "@/components/home/CompareShowcase";
 import { FeatureGrid } from "@/components/home/FeatureGrid";
 import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { PromoTile } from "@/components/home/PromoTile";
-import { QuizTeaser } from "@/components/home/QuizTeaser";
 import { ProductCard } from "@/components/product/ProductCard";
 import { ProductRail, type RailLink } from "@/components/product/ProductRail";
 import { SectionHeader } from "@/components/ui/SectionHeader";
@@ -18,9 +16,10 @@ import { productCount } from "@/lib/catalog/summary";
 import { getToday } from "@/lib/catalog/today";
 
 /**
- * Accueil (refonte, §3.1, lot 4) : hero manuel, catégories, 3 tuiles, Nouveautés, « Parcourir
- * par marque », comparateur, réassurance. Les produits viennent de `home_slots` ; les comptes,
- * prix d'entrée et vignettes de marque sont calculés à partir du catalogue, jamais écrits en dur.
+ * Accueil (refonte, §3.1, lot 4) : hero, catégories, 3 tuiles, Nouveautés, « Parcourir par
+ * marque et réassurance. Comparaison et aide au choix restent accessibles depuis le menu sur
+ * `/comparer` et `/aide-au-choix`. Les produits viennent de `home_slots` ; comptes et prix sont
+ * calculés.
  */
 export default async function HomePage() {
   const [home, catalog, brands, categories, today] = await Promise.all([
@@ -119,8 +118,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <CompareShowcase entries={home.compare} categories={categories} />
-      <QuizTeaser />
       <FeatureGrid />
     </>
   );

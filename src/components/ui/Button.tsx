@@ -36,10 +36,18 @@ export type ButtonProps = LinkButtonProps | NativeButtonProps;
  */
 export function Button(props: ButtonProps) {
   if (props.href !== undefined) {
-    const { variant, size, className, children, pressed: _pressed, ...rest } = props;
+    const {
+      variant,
+      size,
+      className,
+      children,
+      pressed: _pressed,
+      prefetch = false,
+      ...rest
+    } = props;
     void _pressed;
     return (
-      <Link className={buttonClasses({ variant, size, className })} {...rest}>
+      <Link className={buttonClasses({ variant, size, className })} prefetch={prefetch} {...rest}>
         {children}
       </Link>
     );

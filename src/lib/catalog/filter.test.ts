@@ -36,8 +36,8 @@ describe("filterCatalog", () => {
     const result = filterCatalog(products, {
       brands: ["xiaomi"],
       category: "montres",
-      minPrice: 50000,
-      maxPrice: 100000,
+      minPrice: 72000,
+      maxPrice: 72000,
       inStock: true,
       sort: "price-asc",
     });

@@ -5,6 +5,16 @@ du plan (`v0.N.0`), puis `v1.0.0`.
 
 ## [Non publié]
 
+### Catalogue étendu
+
+- 73 modèles supplémentaires référencés avec leur source fabricant : 22 Apple, 21 Samsung et
+  30 Xiaomi/Redmi/POCO ; catalogue total de 103 produits.
+- Les données sans visuel dédié utilisent le visuel SVG de secours, sans reprendre la photo d’un
+  autre appareil. Les prix de ces ajouts sont estimatifs et restent signalés comme indicatifs.
+- Mise à jour des compteurs, tests du catalogue et génération du seed Supabase.
+- Les visuels de secours sont devenus des illustrations originales différenciées par modèle et
+  catégorie, sans reprendre les photos de presse ni les images Pinterest.
+
 ### Panier (étape 5 avancée, branche `panier`)
 
 - Panier local versionné (`versus.cart.v1`) : réducteur pur, stockage réparé à la relecture,
@@ -31,18 +41,19 @@ du plan (`v0.N.0`), puis `v1.0.0`.
 
 ### Refonte, lot 4 : accueil (branche `panier`)
 
-- Hero manuel (aucune rotation automatique) : iPhone 18 Pro, Galaxy S26 Ultra, Xiaomi 17 Ultra ;
-  barre ‹ › ● ○ ○ de 44 px sous le texte (sous la photo sur téléphone) ; prix « Dès 970 000 FCFA »
-  en 28 / 22 px ; « Voir l'iPhone 18 Pro », « Tout Apple », « Comparer » ; marque cliquable ; halo
-  flouté et animations infinies retirés, fondu de 400 ms.
+- Hero en rotation automatique toutes les 6 s : iPhone 18 Pro, Galaxy S26 Ultra, Xiaomi 17 Ultra ;
+  commandes ‹ › ● ○ ○ et lecture/pause de 44 px sous le texte (sous la photo sur téléphone) ;
+  prix « Dès 970 000 FCFA » en 28 / 22 px ; « Voir l'iPhone 18 Pro », « Tout Apple »,
+  « Comparer » ; marque cliquable ; halo flouté et animations infinies retirés, fondu de 400 ms.
 - Catégories en pastilles avec compteur ; 3 tuiles (A57, AirPods Pro 3, Redmi Watch 6) avec prix,
   un bouton et marque cliquable ; « Nouveautés » avec filtre par marque **sans JavaScript**
   (`RadioPills` et `:has()`) et lien d'en-tête qui suit le filtre ; « Parcourir par marque »
   (cartes pastel vers `/marques/<slug>`, médaillons VS, rangées de 112 px sur téléphone) ;
   comparateur par critère sur téléphone, familles sans JavaScript, groupes de la refonte ;
   réassurance en 3 éléments simulés ou indicatifs ; titres sans surtitre ni point final.
-- `Pill` et `PillGroup` remplacés par `RadioPills` ; `useCarouselPause`, icônes lecture/pause et
-  champ `visual` des thèmes de marque supprimés ; `ProductCard` scindée (`ProductCardContent`).
+- `Pill` et `PillGroup` remplacés par `RadioPills` ; logique de pause intégrée à `HeroRotator`
+  avec une commande lecture/pause, sans hook séparé ; champ `visual` des thèmes de marque
+  supprimé ; `ProductCard` scindée (`ProductCardContent`).
 - Budget JavaScript : 152 592 octets sur `/` et la fiche (sous 150 Ko), après réductions
   (docs/audits/budget.md) ; Lighthouse mobile mesuré (docs/audits/lighthouse-lot-4.md : LCP
   simulé toujours au-dessus de 2,5 s sur une machine lente, critère ouvert).
@@ -166,10 +177,10 @@ simulé 3,2 s (seuil 2,5 s), cause et reprise documentées dans `docs/audits/lig
   `CarouselControls`, `HeroSlide`), `CategoryNav`, `PromoTile` × 5, Nouveautés (`PillGroup` et
   `ProductRail`), `BrandCard` × 3, `CompareShowcase` (onglets de famille, six lignes clés de
   `lib/compare/rows.ts`), `FeatureGrid` ; `QuizTeaser` prêt et masqué jusqu'à l'étape 5.
-- Carrousel accessible (modèle APG) : une seule horloge (fin de l'animation de la barre), pause au
-  survol à la souris, au focus et onglet caché, bouton lecture/pause (WCAG 2.2.2), flèches du
-  clavier, diapositives `group` « n sur 3 », région `aria-live` à l'arrêt, aucun défilement sous
-  mouvement réduit.
+- Carrousel accessible (modèle APG) : rotation par minuteur de 6 s, poursuite au survol, bouton
+  lecture/pause (WCAG 2.2.2), suspension au focus des autres commandes et quand l'onglet est caché,
+  flèches du clavier, diapositives `group` « n sur 3 », région `aria-live` à l'arrêt, aucun
+  défilement sous mouvement réduit.
 - Fiche `/produit/[slug]` (accroche, coloris et prix, caractéristiques, garantie, mention
   « Prix indicatifs ») et `/boutique` groupée par catégorie ; 404 dès la première visite d'un slug
   inconnu (`ensureStatic = "navigation"`).

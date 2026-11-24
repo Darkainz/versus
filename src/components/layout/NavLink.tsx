@@ -14,12 +14,14 @@ import { isCurrentLink } from "./nav-current";
 export function NavLink({
   href,
   markCurrent = true,
+  prefetch = false,
   ...props
 }: ComponentProps<typeof Link> & { href: string; markCurrent?: boolean }) {
   const pathname = usePathname();
   return (
     <Link
       href={href}
+      prefetch={prefetch}
       aria-current={isCurrentLink(pathname, href, markCurrent) ? "page" : undefined}
       {...props}
     />

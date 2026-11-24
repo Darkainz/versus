@@ -14,6 +14,8 @@ export type CompareRow = {
   format: (product: ProductDetail) => string | null;
   /** Sens de la « meilleure valeur » (étape 5) ; `null` si la ligne ne se classe pas. */
   better: "higher" | "lower" | null;
+  /** Valeur numérique de comparaison, distincte du texte affiché. */
+  score?: (product: ProductDetail) => number | null;
   home: boolean;
 };
 
@@ -52,6 +54,7 @@ const rows = {
         ? null
         : `${p.max_price_fcfa !== p.min_price_fcfa ? "Dès " : ""}${formatFCFA(p.min_price_fcfa)}`,
     better: "lower",
+    score: (p) => p.min_price_fcfa,
   },
   screen: {
     key: "screen",
@@ -70,6 +73,7 @@ const rows = {
     label: "Fréquence d’affichage",
     format: (p) => (p.specs.refresh_hz ? `${p.specs.refresh_hz} Hz` : null),
     better: "higher",
+    score: (p) => p.specs.refresh_hz ?? null,
   },
   chip: { key: "chip", label: "Puce", format: (p) => p.specs.chip ?? null, better: null },
   autonomy: {
@@ -77,6 +81,7 @@ const rows = {
     label: "Autonomie indicative",
     format: (p) => autonomy(p.specs.autonomy_hours),
     better: "higher",
+    score: (p) => p.specs.autonomy_hours ?? null,
   },
   storage: {
     key: "storage",
@@ -91,24 +96,35 @@ const rows = {
         : null;
     },
     better: "higher",
+    score: (p) =>
+      p.variants.reduce<number | null>(
+        (largest, variant) =>
+          variant.storage_gb === null
+            ? largest
+            : Math.max(largest ?? variant.storage_gb, variant.storage_gb),
+        null,
+      ),
   },
   weight: {
     key: "weight",
     label: "Poids",
     format: (p) => (p.specs.weight_g ? `${decimal.format(p.specs.weight_g)} g` : null),
     better: "lower",
+    score: (p) => p.specs.weight_g ?? null,
   },
   camera: {
     key: "camera",
     label: "Appareil photo principal",
     format: (p) => (p.specs.main_camera_mp ? `${p.specs.main_camera_mp} Mpx` : null),
     better: "higher",
+    score: (p) => p.specs.main_camera_mp ?? null,
   },
   charging: {
     key: "charging",
     label: "Charge rapide",
     format: (p) => (p.specs.charging_w ? `${p.specs.charging_w} W` : null),
     better: "higher",
+    score: (p) => p.specs.charging_w ?? null,
   },
   ip: { key: "ip", label: "Étanchéité", format: (p) => p.specs.ip_rating ?? null, better: null },
   fiveG: { key: "5g", label: "5G", format: (p) => yesNo(p.specs.has_5g), better: null },
@@ -129,6 +145,7 @@ const rows = {
     label: "Garantie indiquée",
     format: (p) => `${p.warranty_months} mois`,
     better: "higher",
+    score: (p) => p.warranty_months,
   },
 } satisfies Record<string, Omit<CompareRow, "home">>;
 

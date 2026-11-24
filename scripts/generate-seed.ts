@@ -150,6 +150,7 @@ insert into public.product_images (
 )
 values
 ${products
+  .filter((product) => product.image_src)
   .map(
     (product) =>
       `  (${sqlText(product.id)}, null, ${nullableText(product.image_src)}, ${sqlNumber(product.image_width)}, ${sqlNumber(product.image_height)}, ${nullableText(product.image_alt)}, true, 0)`,

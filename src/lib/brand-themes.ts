@@ -242,6 +242,18 @@ export const fallbackVisuals = {
   bandDot: "#FFFFFF",
 } as const;
 
+/** Palettes des illustrations SVG originales des modèles sans photo dédiée. */
+export const productArtworkPalettes = [
+  { body: "#D6DCE5", accent: "#596A9B", screen: "#17243D", glow: "#8EA8FF", strap: "#454D60" },
+  { body: "#D8C6B4", accent: "#A46A45", screen: "#33251E", glow: "#D9A778", strap: "#5B4032" },
+  { body: "#C9D8D2", accent: "#4D806F", screen: "#172D2A", glow: "#83C5A8", strap: "#38594F" },
+  { body: "#D8C6D9", accent: "#896493", screen: "#302238", glow: "#D0A7D8", strap: "#604966" },
+  { body: "#C6D3DF", accent: "#497B9C", screen: "#172B38", glow: "#85C4E8", strap: "#3C596B" },
+  { body: "#DDC7C2", accent: "#A45F61", screen: "#342022", glow: "#E39A91", strap: "#674244" },
+  { body: "#D5D1C2", accent: "#81784C", screen: "#292719", glow: "#D1C37A", strap: "#5C5738" },
+  { body: "#C7CBD0", accent: "#69727C", screen: "#20262D", glow: "#AEBAC6", strap: "#454C54" },
+] as const;
+
 /** Accent par défaut du SVG de secours (la maquette utilisait le bleu Apple, désormais interdit). */
 export const fallbackAccent: Record<Brand, string> = {
   apple: "#1A1D1B",

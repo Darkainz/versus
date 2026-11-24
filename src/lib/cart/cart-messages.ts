@@ -63,6 +63,10 @@ export function noticeMessage(notice: CartNotice): string {
       return "Le stockage de ce navigateur est plein : le panier ne sera pas conservé.";
     case "unavailable":
       return "Ce navigateur bloque le stockage local : le panier sera perdu en quittant le site.";
+    case "sync-error":
+      return "La synchronisation du panier de compte a échoué. Réessayez en modifiant le panier.";
+    case "sync-overflow":
+      return "Les paniers de l’appareil et du compte dépassent 20 références. Aucun panier n’a été écrasé : retirez des articles pour les fusionner.";
   }
 }
 
