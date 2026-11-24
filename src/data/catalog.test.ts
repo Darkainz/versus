@@ -138,7 +138,9 @@ describe("catalogue de démonstration", () => {
         unique(variants.map((v) => `${v.color_slug}|${v.storage_gb}|${v.size_mm}`)),
         product.code,
       ).toBe(true);
-      if (product.category_slug !== "smartphones") expect(hasStorage[0]).toBe(false);
+      // Règle de la base (déclencheur variants_check_attributes) : un smartphone porte un stockage,
+      // les autres catégories (écouteurs, bracelets…) n'en portent pas.
+      expect(hasStorage[0], product.code).toBe(product.category_slug === "smartphones");
       const activePrices = variants.filter((v) => v.is_active).map((v) => v.price_fcfa);
       expect(product.min_price_fcfa).toBe(Math.min(...activePrices));
       expect(product.max_price_fcfa).toBe(Math.max(...activePrices));
