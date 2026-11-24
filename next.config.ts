@@ -13,6 +13,26 @@ if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
   }
 }
 
+/**
+ * En-têtes de sécurité (étape 9). La CSP est volontairement MINIMALE : pas de `script-src` strict,
+ * car l'App Router injecte des scripts inline et un nonce rendrait toutes les pages dynamiques
+ * (compromis documenté dans docs/decisions/006-noindex.md).
+ */
+const securityHeaders = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  {
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()",
+  },
+  {
+    key: "Content-Security-Policy",
+    value: "frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'",
+  },
+  // Pendant de frame-ancestors pour les navigateurs anciens.
+  { key: "X-Frame-Options", value: "DENY" },
+];
+
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
@@ -28,6 +48,9 @@ const nextConfig: NextConfig = {
     deviceSizes: [384, 480, 640],
     imageSizes: [128, 192, 256],
     qualities: [75],
+  },
+  async headers() {
+    return [{ source: "/:path*", headers: securityHeaders }];
   },
   // Noms officiels Samsung (refonte, lot 1) : les anciennes adresses restent valides.
   async redirects() {

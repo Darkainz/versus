@@ -1,3 +1,6 @@
+import { JsonLd } from "@/components/seo/JsonLd";
+import { siteUrl } from "@/lib/env";
+import { organizationJsonLd } from "@/lib/json-ld";
 import { Fragment } from "react";
 import { BrandCard } from "@/components/home/BrandCard";
 import { CategoryNav } from "@/components/home/CategoryNav";
@@ -44,6 +47,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <JsonLd data={organizationJsonLd(siteUrl)} />
       <h1 className="sr-only">VERSUS, Apple, Samsung et Xiaomi au Togo</h1>
       <HeroCarousel entries={home.hero} />
       <CategoryNav categories={categories} products={catalog} />
