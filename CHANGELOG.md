@@ -5,12 +5,26 @@ du plan (`v0.N.0`), puis `v1.0.0`.
 
 ## [Non publié]
 
+### Photos officielles des modèles ajoutés
+
+- 71 des 73 modèles ajoutés ont désormais une vraie photo officielle (apple.com, samsung.com, mi.com),
+  détourée et recadrée comme les 30 premières (PNG < 200 Ko, 900 px au plus, marge de 4 %) :
+  101 produits sur 103 ont une photo. Origine et date (23/11/2026) dans `public/products/SOURCES.md`,
+  `src/data/product-visuals.ts` et la page /credits ; dimensions et textes alternatifs dans
+  `src/data/additional-photos.ts`.
+- iPhone 12 Pro et iPhone 12 Pro Max gardent le SVG de secours : Apple n'héberge plus de visuel
+  détouré exploitable de ces modèles.
+- Aucun visuel de Pinterest ni de site tiers. `airpods4.png` et `a4aradb.png` sont le même fichier.
+- Test du catalogue : chaque photo correspond à un modèle ajouté. Planche contact et seed Supabase
+  regénérés (la planche ne liste que les produits avec photo) ; référence visuelle de l'accueil
+  à 1440 px mise à jour (docs/audits/visuel.md).
+
 ### Catalogue étendu
 
 - 73 modèles supplémentaires référencés avec leur source fabricant : 22 Apple, 21 Samsung et
   30 Xiaomi/Redmi/POCO ; catalogue total de 103 produits.
 - Les données sans visuel dédié utilisent le visuel SVG de secours, sans reprendre la photo d’un
-  autre appareil. Les prix de ces ajouts sont estimatifs et restent signalés comme indicatifs.
+  autre appareil (voir ci-dessus pour les photos ajoutées). Les prix de ces ajouts sont estimatifs et restent signalés comme indicatifs.
 - Mise à jour des compteurs, tests du catalogue et génération du seed Supabase.
 - Les visuels de secours sont devenus des illustrations originales différenciées par modèle et
   catégorie, sans reprendre les photos de presse ni les images Pinterest.

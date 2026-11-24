@@ -12,7 +12,8 @@ import { additionalProducts } from "./additional-products";
  * prix officiel en France × 655,957, arrondi au millier de FCFA (relevés des 16 et 17/11/2026,
  * détail dans `docs/plans/produits-recherche.json` et `public/products/SOURCES.md`). Les modèles
  * ajoutés et leurs sources officielles sont décrits dans `additional-products.ts`; leurs prix sont
- * estimatifs et leurs visuels utilisent le SVG de secours.
+ * estimatifs ; leurs photos officielles sont dans `additional-photos.ts`, un modèle sans photo
+ * exploitable garde le SVG de secours.
  * `new_until` = `release_date` + 90 jours, comme le trigger `products_defaults`.
  *
  * Conventions : coloris officiels de la marque, en minuscules après le premier mot (« Bleu clair »,
