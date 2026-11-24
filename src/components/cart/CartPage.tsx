@@ -14,8 +14,7 @@ import { useCartQuote } from "./use-cart-quote";
 /**
  * Contenu de la page `/panier` (PLAN §6, étape 5), îlot client : lignes (quantités, retrait),
  * « Vider le panier », zone de livraison (zones lues par le serveur via `CartQuoter.listZones()`),
- * totaux recalculés par le serveur, messages d'écart, état vide. Aucune commande ni paiement :
- * sans route « commande » livrée, « La commande simulée arrive bientôt » remplace le bouton.
+ * totaux recalculés par le serveur, messages d'écart, état vide et lien vers la commande simulée.
  * N'importe ni le tiroir ni `Dialog` (budget JavaScript ; la confirmation est chargée au clic).
  */
 export function CartPage({
@@ -130,7 +129,7 @@ export function CartPage({
               </Button>
             ) : (
               <p className="mt-6 rounded-control bg-surface p-3 text-sm font-semibold">
-                La commande simulée arrive bientôt.
+                La commande simulée n’est pas disponible.
               </p>
             )}
             <p className="mt-4 text-xs text-muted">

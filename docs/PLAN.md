@@ -187,7 +187,7 @@ versus/
    │  │             VisuallyHidden, SkipLink, Reveal, SectionHeader, Skeleton, Spinner, EmptyState
    │  ├─ layout/    AnnouncementBar, SiteHeader, MainNav, MobileMenu, Logo, SiteFooter, PaymentBadges, AccountLink
    │  ├─ home/      HeroCarousel, HeroSlide, CarouselControls, ProgressDot, CategoryNav, CategoryChip, PromoTile,
-   │  │             BrandCard, CompareShowcase, QuizTeaser, FeatureGrid
+   │  │             BrandCard, QuizTeaser (styleguide), FeatureGrid
    │  ├─ product/   ProductView (fiche, données en props), ProductVisual, ProductCard, ProductRail, ProductGrid,
    │  │             ProductGallery, CatalogFilters, SortSelect, VariantPicker, LiveStock, Breadcrumbs, SpecSheet,
    │  │             DeliveryEstimate, RelatedProducts
@@ -249,7 +249,7 @@ Les tests unitaires sont placés à côté du code testé (`fcfa.test.ts` à cô
 | `/connexion`, `/inscription`, `/mot-de-passe-oublie`, `/reinitialiser-mot-de-passe` | `(auth)/…/page.tsx` | 7 | Server Actions dans `server/actions/auth.ts` |
 | `/auth/confirm`, `/auth/callback`, `/auth/signout` | `auth/…/route.ts` | 7 | Route Handlers |
 | `/admin` | `admin/page.tsx` (+ `layout.tsx` coquille) | 8 | Indicateurs ; `requireAdmin()` dans chaque page |
-| `/admin/produits`, `/admin/produits/nouveau`, `/admin/produits/[id]` | `admin/produits/…` | 8 | CRUD sous RLS, avec la session de l'admin |
+| `/admin/produits`, `/admin/produits/nouveau`, `/admin/produits/[id]` | `admin/produits/…` | 8 | CRUD sous RLS, avec la session de l'admin ; édition atomique des variantes sans accès direct au stock, spécifications et images |
 | `/admin/produits/[id]/apercu` | `admin/produits/[id]/apercu/page.tsx` | 8 | Fiche rendue par `ProductView` avec le client serveur et `requireAdmin()`, **sans cache** ; fonctionne pour un produit inactif |
 | `/admin/stock` | `admin/stock/page.tsx` | 8 | `admin_adjust_stock` |
 | `/admin/commandes`, `/admin/commandes/[numero]` | `admin/commandes/…` | 8 | `admin_set_order_status` |
@@ -450,7 +450,7 @@ La maquette reprend la palette d'apple.com (`#0071E3`, `#0066CC`, `#2997FF`, `#B
 | `IconButton` + `CountBadge` | `.ibtn`, `.count` | C | `label`, `icon`, `count` | Libellé « Panier, 3 articles » ; `aria-live="polite"` ; animation `bump` rejouée par `key` |
 | `SiteHeader`, `MainNav`, `MobileMenu` | `.hdr` | S + îlot C | `groups` (de `config/site.ts`) | Menu mobile (`<dialog>`) ≤ 900 px ; `aria-current` ; en-tête opaque sur mobile (écart D5) ; chaque icône (Rechercher, Comparateur, Panier, Mon compte) est masquée tant que sa route n'est pas livrée |
 | `HeroCarousel` et sous-composants | hero | C | `slides`, `interval=6000` | §4.5 |
-| `CategoryNav`, `CategoryChip` | `nav.cats` | S | `items` (de `config/site.ts`) | Cibles selon l'étape (table de l'étape 3) : `/boutique#<categorie>` puis `/boutique/[categorie]` ; `#comparer` puis `/comparer` ; `#aide` seulement quand `QuizTeaser` est affiché |
+| `CategoryNav`, `CategoryChip` | `nav.cats` | S | `items` (de `config/site.ts`) | Cibles selon l'étape (table de l'étape 3) : `/boutique#<categorie>` puis `/boutique/[categorie]` |
 | `PromoTile` | `.tile` | S | `product`, `size`, `themeKey`, `secondary` | « Acheter » ouvre la fiche ; « Comparer » ouvre `/comparer?p=<code>` dès l'étape 5 (masqué avant) |
 | `ProductVisual` | Device.dc.html | S | `image?`, `kind`, `alt`, `sizes`, `priority?` | `next/image` avec `width`/`height` de la base ; SVG de secours avec `useId()` et couleurs lues dans `brand-themes.ts` ; attribut `data-product="<code>"` (test de répétition) |
 | `ProductView` | — | S | `product`, `variants`, `stockSlot` | Fiche complète en props : sert à `/produit/[slug]` (client public, cache) et à l'aperçu admin (client serveur, sans cache) |
@@ -458,10 +458,10 @@ La maquette reprend la palette d'apple.com (`#0071E3`, `#0066CC`, `#2997FF`, `#B
 | `ProductRail` | `.rail` | C | `products`, `label` | Flèches désactivées aux extrémités, `scrollBy` d'une carte, `role="region"`, `ul/li`, clavier |
 | `PillGroup` | `.pills` | C | `options`, `value`, `onChange` ou `hrefFor` | `aria-pressed`, ou `aria-current` quand ce sont des liens |
 | `BrandCard` | `.brand` | S | `brand`, `visual` | Lien vers `/boutique` (étape 3) puis `/marques/[marque]` (étape 4) ; nom accessible court |
-| `CompareShowcase` | pin et `#comparer` | S + onglets C | `groups` | Remplace la section pin ; vrai `<table>` de 6 lignes clés (écart D5) ; bouton panier selon D5, actif à l'étape 5 (§4.5) |
+| `CompareShowcase` | ancienne section `#comparer` de l'accueil | S + onglets C | `groups` | Conservé dans le code mais retiré de l'accueil le 23 novembre 2026 à la demande de l'utilisateur ; la comparaison reste disponible sur `/comparer` depuis le menu |
 | `CompareTable` | `.cmp-box` | S | `products`, `rows`, `onlyDiff?` | `<caption>`, `th scope`, meilleure valeur indiquée par un texte |
 | `CompareTray` | `.tray` | C | — | `role="status"`, lien vers `/comparer?p=…`, « Vider » |
-| `QuizTeaser` | quiz | S (formulaire GET) | — | Question 1 seule (écart D5), `action="/aide-au-choix"` ; affiché à partir de l'étape 5 |
+| `QuizTeaser` | aperçu quiz dans le styleguide | S (formulaire GET) | — | Question 1 seule (écart D5) ; conservé pour le styleguide, retiré de l'accueil le 23 novembre 2026 ; `/aide-au-choix` reste accessible depuis le menu |
 | `QuizStep`, `QuizProgress`, `QuizResults` | quiz | S (formulaire GET) | `step`, `answers` | `fieldset`/`legend`, `role="progressbar"`, focus sur la `legend`, état vide |
 | `FeatureGrid`, `SiteFooter`, `PaymentBadges` | réassurance, `.foot` | S | — | Liens issus de `config/site.ts` |
 | `Dialog`, `Drawer`, `Toaster`, `Stepper`, `Field`, `RadioCard` | nouveaux | C | — | `<dialog>` natif ; erreurs reliées par `aria-describedby` ; `autocomplete` et `inputmode="tel"` |
@@ -479,14 +479,15 @@ La maquette reprend la palette d'apple.com (`#0071E3`, `#0066CC`, `#2997FF`, `#B
 |---|---|---|
 | Visuels qui débordaient ; pas de viewport | Déjà corrigés dans la maquette. On garde `ProductVisual` dans un conteneur à hauteur fixée avec `object-contain`, et `export const viewport` dans `layout.tsx`. | 1 et 3 |
 | Page trop longue, iPhone affiché 6 fois, tuiles et pin en doublon | **Section pin supprimée** et fusionnée dans `CompareShowcase` (titre du pin « iPhone, Galaxy ou Redmi ? », 3 téléphones en en-tête du tableau, sans hauteur ajoutée). **Tuile iPhone supprimée.** Les cartes marque utilisent d'autres visuels (Apple : aw12, Samsung : gb4, Xiaomi : rw6). **Critères mesurables** (étapes 3 et 9) : hauteur de `/` à 1440 px ≤ 6 000 px (maquette : environ 8 600 px) ; aucun produit visible plus de 3 fois à l'état initial (test générique, tous produits confondus). | 3 |
+| Accueil trop chargé | Retrait de `CompareShowcase`, du lien « Comparer » du hero et du teaser `QuizTeaser` le 23 novembre 2026 ; les menus conservent les accès à `/comparer` et `/aide-au-choix`. | 3 |
 | Section pin de 2200 px fragile | Supprimée ; aucun `sticky` sur une grande hauteur. | 3 |
 | Badge « Nouveau » partout | `isNew(product, today)` : `new_until >= today` (fuseau Africa/Lome), testé ; `today` vient de `getToday()`, injectable par `VS_TODAY`. Retiré des puces du hero. | 3 |
 | Rail sans flèches | `ProductRail` avec flèches, désactivation aux extrémités, clavier et scroll-snap. | 3 |
-| Comparateur trop pauvre | 12 lignes typées (§5.4) sur `/comparer` : prix, écran, fréquence, puce, autonomie, stockage, poids, photo, charge, IP, 5G ou réduction de bruit, compatibilité, garantie. Sur l'accueil, `CompareShowcase` montre 6 lignes clés, prix compris (marquées `home: true` dans `rows.ts`), contre 3 lignes, le prix et « Ajouter au panier » dans la maquette (écart D5). | 3 (accueil), 5 (page) |
-| Quiz avec une question inutile | Q3 (téléphone) posée **seulement** pour l'audio et les montres ; Q4 (priorité) facultative et utilisée dans le score ; tranches de budget par famille ; état vide explicite. Sur l'accueil, le quiz interactif de la maquette devient un `QuizTeaser` (question 1 seule, formulaire GET vers `/aide-au-choix`) : écart D5. | 5 |
+| Comparateur trop pauvre | 12 lignes typées (§5.4) sur `/comparer` : prix, écran, fréquence, puce, autonomie, stockage, poids, photo, charge, IP, 5G ou réduction de bruit, compatibilité, garantie. La comparaison complète reste accessible depuis le menu ; sa section de synthèse a été retirée de l'accueil le 23 novembre 2026 pour l'alléger. | 5 (page) |
+| Quiz avec une question inutile | Q3 (téléphone) posée **seulement** pour l'audio et les montres ; Q4 (priorité) facultative et utilisée dans le score ; tranches de budget par famille ; état vide explicite. Le teaser d'accueil a été retiré le 23 novembre 2026 ; le questionnaire complet reste sur `/aide-au-choix`, accessible depuis le menu. | 5 |
 | Boutons qui ne mènent nulle part | Chaque CTA visible a une route réelle. Un élément dont la route n'est pas livrée est masqué ou redirigé (table de l'étape 3). Navigation, en-tête et pied de page pilotés par `config/site.ts`. `liens.spec.ts` contrôle les liens, les `action` de formulaires et les ancres à chaque étape. | 1 à 9 |
 | Identité trop proche d'apple.com | §4.2. | 2 |
-| Carrousel | Changement de diapositive déclenché par `animationend` de la barre de progression (une seule horloge, pause synchronisée). Pause au survol, au focus et quand l'onglet est caché. Flèches du clavier. Pas d'autoplay sous mouvement réduit. **Un seul `h1`** (titre de page en `VisuallyHidden`) ; les diapositives portent des `h2`. | 3 |
+| Carrousel | Rotation toutes les 6 s par minuteur. Elle continue au survol ; commandes lecture/pause et pause au focus des autres commandes ou quand l'onglet est caché. Flèches du clavier. Pas d'autoplay sous mouvement réduit. **Un seul `h1`** (titre de page en `VisuallyHidden`) ; les diapositives portent des `h2`. | 3 |
 | Pas de navigation mobile, de lien d'évitement ni de `<main>` | `MobileMenu`, `SkipLink` (layout racine), `<main id="contenu">` dans **chaque gabarit de groupe**, entre l'en-tête et le pied de page : `banner` et `contentinfo` restent au premier niveau. | 1 et 2 |
 | Purge silencieuse du comparateur | Autre famille : `Dialog` « Le comparateur accepte 3 produits d'une même famille. Remplacer la sélection ? ». 4e produit : toast qui nomme le produit retiré. Retirer un produit ne change pas l'onglet. « Comparer » depuis un produit seul ouvre un tableau de **sa** famille (règle de l'étape 5), et non l'onglet Smartphones comme dans la maquette. | 5 |
 | Prix avec des espaces sécables | `formatFCFA()` : `Intl.NumberFormat('fr-FR')` puis une espace insécable et « FCFA ». | 1 |
@@ -500,10 +501,8 @@ La maquette reprend la palette d'apple.com (`#0071E3`, `#0066CC`, `#2997FF`, `#B
 5. `PromoTile` × 5 (A57 en pleine largeur, puis AirPods 5, Galaxy Buds 4, Apple Watch Series 12, Redmi Watch 6) ;
 6. Nouveautés (`PillGroup` et `ProductRail`) ;
 7. `BrandCard` × 3 ;
-8. `CompareShowcase` (`#comparer`) : onglets de famille, tableau de 6 lignes clés (prix compris), bouton « Ajouter au panier » selon D5 (actif à l'étape 5), lien « Comparateur complet → » (étape 5) ;
-9. `QuizTeaser` (`#aide`) : la question 1, en formulaire GET vers `/aide-au-choix`, sans JavaScript (affiché à partir de l'étape 5) ;
-10. `FeatureGrid` ;
-11. `SiteFooter`.
+8. `FeatureGrid` ;
+9. `SiteFooter`.
 
 `CompareTray` et `CartDrawer` sont des éléments globaux du layout `(site)` (étape 5).
 
@@ -608,7 +607,7 @@ create type public.stock_reason    as enum ('order','order_cancelled','restock',
 | `profiles` | `id uuid pk → auth.users on delete cascade` · `full_name text not null default '' check (char_length(full_name) <= 120)` · `email text` (copie informative) · `phone text check (phone ~ '^\+228[0-9]{8}$')` · `created_at`, `updated_at` |
 | `user_roles` | `user_id uuid pk → profiles on delete cascade` · `role user_role not null` (**sans valeur par défaut**) · `granted_at timestamptz not null default now()` |
 | `addresses` (étape 7) | `id uuid pk` · `user_id → profiles cascade` · `label text not null default 'Domicile'` · `recipient_name text not null` · `phone text not null check (+228)` · `zone_code text not null → delivery_zones` · `city text not null`, `district text not null`, `landmark text not null`, `instructions text` · `is_default boolean not null default false` · index unique partiel `(user_id) where is_default` · index `(user_id)` |
-| `carts` (étape 7, selon D9) | `user_id uuid pk → profiles on delete cascade` · `items jsonb not null default '[]' check (jsonb_typeof(items) = 'array' and jsonb_array_length(items) <= 10)` (SKU et quantités seulement, **jamais de prix**) · `updated_at` |
+| `carts` (étape 7, selon D9) | `user_id uuid pk → profiles on delete cascade` · `items jsonb not null default '[]' check (jsonb_typeof(items) = 'array' and jsonb_array_length(items) <= 20)` (SKU et quantités seulement, **jamais de prix**) · `updated_at` |
 
 - **Le rôle n'est pas dans `profiles`**, que l'utilisateur peut modifier : il est dans `user_roles`, qui n'a **aucune politique d'écriture**. Cela corrige l'incohérence de « pedago » : un admin ne peut pas modifier un rôle depuis l'application.
 - La promotion se fait **uniquement** par SQL (`insert into public.user_roles values ('<uuid>','admin')`) dans le SQL Editor, ou par `scripts/seed-demo-users.ts` avec la clé secrète. `/admin/clients` reste en lecture seule.
@@ -905,7 +904,7 @@ Autres données :
 - `product_specs` : valeurs de la maquette (A20 Pro, 179 g, 100 W, 24 jours…). Les autres sont indicatives et portent la mention `specs_note`.
 - Numérotation : la séquence démarre à 101 (`start with 101`, migration `orders`). Le seed n'a pas besoin de `setval`.
 - **Comptes de démo** : `scripts/seed-demo-users.ts` crée `client.demo@versus.test` et `admin.demo@versus.test` avec des mots de passe générés, écrits dans `.env.local` (non commité), puis insère la ligne `user_roles` de l'admin. Il ne tourne que contre le local ou `versus-dev`, sauf avec un drapeau explicite `--prod` (une seule fois, pour la soutenance). Les identifiants sont transmis au correcteur hors du dépôt.
-- **Extension du catalogue** (facultative, étape 4) : 20 à 25 produits, **seulement** avec des visuels sourcés dans `SOURCES.md`. Sinon, on utilise le SVG de secours. Priorités : des écouteurs Xiaomi (la famille audio n'a que 2 produits) et des smartphones à moins de 150 000 FCFA.
+- **Extension du catalogue** (étape 4, réalisée) : 73 modèles ajoutés avec des caractéristiques reliées aux pages officielles des fabricants (22 Apple, 21 Samsung, 30 Xiaomi/Redmi/POCO), soit 103 produits au total. Les prix ajoutés sont estimatifs ; les produits sans photo autorisée utilisent une illustration SVG originale, différenciée par modèle et catégorie. Données et liens : `src/data/additional-products.ts`.
 
 ### 5.10 Images
 
@@ -1163,7 +1162,7 @@ gh release create v0.1.0 --title "Étape 1 : socle" --notes "Production : <URL>"
   - `lib/catalog/types.ts` (typé comme la future vue `catalog_products`), `repository.ts`, `static-repository.ts`, `queries.ts`, `is-new.ts`, `today.ts` (`getToday()`, `VS_TODAY` hors production) ;
   - `src/data/catalog.ts` : 9 produits, variantes (avec `color_hex`), specs, images et `home_slots` (syntaxe effaçable, sans `enum`) ;
   - primitives `ui/` reportées de l'étape 2 (ADR 002) : `Pill`, `PillGroup`, `Price`, `SectionHeader`, `Reveal`, chacune avec sa section dans `/styleguide` ;
-  - composants `home/*`, `ProductCard`, `ProductRail` avec flèches, `ProductVisual` (`data-product`), `ProductView`, `CompareShowcase` (tableau de 6 lignes clés, sélection par défaut), `QuizTeaser` (composant prêt, masqué jusqu'à l'étape 5) ;
+  - composants `home/*`, `ProductCard`, `ProductRail` avec flèches, `ProductVisual` (`data-product`), `ProductView`, `CompareShowcase` (tableau de 6 lignes clés, non monté sur l'accueil), `QuizTeaser` (aperçu du styleguide, non monté sur l'accueil depuis le 23 novembre 2026) ;
   - `config/site.ts` : chaque élément de la table ci-dessous passe par `routeFor(clé)` ; l'en-tête, la navigation et le pied de page en dépendent entièrement ;
   - **fiche minimale** `/produit/[slug]` (`generateStaticParams`, rendu par `ProductView`) : visuel, nom, accroche, prix minimal, specs, garantie, mention « Prix indicatifs, aucune vente réelle » ;
   - **`/boutique` minimale** : grille des 9 produits, groupée par catégorie, chaque section portant un `id` (`#smartphones`, `#ecouteurs`, `#montres`, `#bracelets`) ;
@@ -1174,15 +1173,11 @@ gh release create v0.1.0 --title "Étape 1 : socle" --notes "Production : <URL>"
   | Élément | Étape 3 | Cible définitive |
   |---|---|---|
   | Hero et tuiles : « Acheter » | fiche `/produit/[slug]` | idem |
-  | Hero et tuiles : « Comparer » | masqué | `/comparer?p=<code>` (5) |
+  | Hero : « Comparer » | retiré de l'accueil le 23 novembre 2026 | `/comparer` reste accessible depuis le menu |
+  | `QuizTeaser` | retiré de l'accueil le 23 novembre 2026 | `/aide-au-choix` reste accessible depuis le menu |
   | Carte produit : « Acheter » | fiche (le choix de la variante se fait sur la fiche) | idem |
   | Carte produit : « + Comparer » | masqué | `CompareButton` (5) |
-  | CompareShowcase : « Ajouter au panier » (selon D5) | remplacé par « Voir le produit » → fiche | `AddToCartButton`, variante par défaut (5) |
-  | CompareShowcase : « Comparateur complet → » | masqué | `/comparer` (5) |
   | CategoryNav : catégories | `/boutique#<categorie>` | `/boutique/[categorie]` (4) |
-  | CategoryNav : « Comparer » | `#comparer` (section présente) | `/comparer` (5) |
-  | CategoryNav : « Aide au choix » (`#aide`) | masqué (`QuizTeaser` masqué) | `#aide` (5) |
-  | `QuizTeaser` (`form action="/aide-au-choix"`) | masqué | affiché (5) |
   | BrandCard | `/boutique` | `/marques/[marque]` (4) |
   | Nouveautés : « Voir tout » | `/boutique` | idem |
   | En-tête : Rechercher | masqué | `/recherche` (4) |
@@ -1197,7 +1192,7 @@ gh release create v0.1.0 --title "Étape 1 : socle" --notes "Production : <URL>"
   - [x] Aucun produit visible plus de 3 fois sur `/`. Test e2e générique : il compte par produit les visuels `[data-product]` et les `img[alt]` visibles à l'état initial, après défilement complet (diapositives cachées et onglets inactifs exclus).
   - [x] Hauteur de `/` à 1440 px ≤ 6 000 px (maquette : environ 8 600 px).
   - [x] Avec `VS_TODAY=2026-11-12`, le badge « Nouveau » n'apparaît que sur ip18, aw12 et ap5. Tests de `isNew` (date passée en paramètre) et test e2e, dont l'attendu est calculé à partir de `catalog.ts` et de `VS_TODAY`.
-  - [x] Carrousel : pause au survol, au focus et quand l'onglet est caché ; barre et changement de diapositive synchronisés après une pause ; flèches du clavier.
+  - [x] Carrousel : rotation toutes les 6 s, y compris au survol ; commande lecture/pause ; pause au focus des autres commandes et quand l'onglet est caché ; flèches du clavier.
   - [x] Avec `reducedMotion: 'reduce'` : pas d'autoplay et tout le texte du hero visible.
   - [x] Rail : flèches désactivées aux extrémités et utilisables au clavier.
   - [x] `liens.spec` vert : aucun `href="#"`, tous les liens internes et `form[action]` répondent 200, toutes les ancres `#id` existent. Chaque ligne « masqué » de la table est absente du DOM.
@@ -1307,7 +1302,7 @@ $$, 'anon et authenticated n''exécutent que les fonctions de la liste blanche')
     - `CartProvider` avec un indicateur `hydrated` ;
     - `AddToCartButton`, `CartDrawer` (`<dialog>`, `aria-live`), `/panier` ;
     - primitives `ui/` reportées de l'étape 2 (ADR 002) : `Drawer`, `Toaster`, `Spinner`, chacune avec sa section dans `/styleguide` ;
-    - « Ajouter au panier » du `CompareShowcase` (variante par défaut), selon D5 ;
+    - « Ajouter au panier » du `CompareShowcase` (variante par défaut), selon D5 ; composant non monté sur l'accueil depuis le 23 novembre 2026 ;
     - migration `rpc_quote_cart` et Server Action `priceCart(lines)` → `quote_cart`. Le total affiché vient **toujours** de la base.
   - **Comparateur** :
     - `compare-reducer.ts` : 3 produits au maximum, même `compare_group`, `Dialog` « Remplacer la sélection ? », toast qui nomme le produit retiré ;
@@ -1327,9 +1322,9 @@ $$, 'anon et authenticated n''exécutent que les fonctions de la liste blanche')
       - Q4 priorité facultative ;
     - `score.ts` : exclusions par `compat`, budget, priorité, écosystème ; état vide suivi des 2 plus proches, marqués « Hors budget » ;
     - `/aide-au-choix` en formulaire GET, sans JavaScript obligatoire ; « Comparer ces 3 » ;
-    - `QuizTeaser` affiché sur l'accueil (`#aide`).
+    - `QuizTeaser` de l'accueil retiré le 23 novembre 2026 ; le menu garde `/aide-au-choix`.
   - Compteurs de l'en-tête branchés.
-  - `config/site.ts` ajoute `/comparer`, `/aide-au-choix` et `/panier`, ainsi que les icônes Comparateur et Panier, les boutons « Comparer » et « + Comparer », et l'entrée « Aide au choix » de CategoryNav.
+  - `config/site.ts` ajoute `/comparer`, `/aide-au-choix` et `/panier`, ainsi que les icônes Comparateur et Panier, les boutons « Comparer » et « + Comparer », et l'entrée « Aide au choix » du menu principal.
 - **Critères d'acceptation** :
   - [ ] Le panier survit au rechargement ; quantité bornée de 1 à 5 et au stock.
   - [ ] Un faux prix écrit dans `localStorage` ne change pas le total.
@@ -1338,7 +1333,7 @@ $$, 'anon et authenticated n''exécutent que les fonctions de la liste blanche')
   - [ ] Un 4e produit déclenche un toast nommé ; un produit d'une autre famille demande confirmation.
   - [ ] Une URL `/comparer?p=…` ouverte en navigation privée affiche le même tableau ; le tableau est un `<table>` avec `th scope`.
   - [ ] « Comparer » de gw9 (hero) ouvre un tableau de **montres** qui contient gw9 (e2e) ; `selection.test.ts` couvre 1, 2, 3 et 4 codes, un code inconnu, des familles mélangées et l'absence de `p`.
-  - [ ] Le quiz fonctionne JavaScript désactivé ; la question « téléphone » n'apparaît pas pour un smartphone ; le formulaire du `QuizTeaser` est couvert par `liens.spec`.
+  - [ ] Le quiz fonctionne JavaScript désactivé ; la question « téléphone » n'apparaît pas pour un smartphone ; `e2e/quiz.spec.ts` couvre l'accès du menu et les formulaires GET.
   - [ ] `score.test.ts` couvre au moins 18 cas : jamais d'Apple Watch ni d'AirPods « idéal » pour un Android, jamais de Galaxy Watch pour un iPhone, état vide, priorité prise en compte.
   - [ ] axe sans violation sérieuse sur `/panier`, `/comparer` et `/aide-au-choix`.
   - [ ] Budgets toujours respectés sur `/` (`budget.spec`), malgré les îlots du panier et du comparateur.
@@ -1364,11 +1359,19 @@ $$, 'anon et authenticated n''exécutent que les fonctions de la liste blanche')
     - T-Money et Flooz : `UssdScreen`, compte à rebours de 2 minutes, « Simuler la validation » et « Simuler un refus », **aucun champ PIN** ;
     - carte : `CardDemo`, **aucun champ de carte** ;
     - changement de moyen de paiement ;
-  - `/commande/[numero]/confirmation` (vide le panier) ;
-  - `/suivi` avec `OrderTimeline` (horaires Africa/Lome) ;
+  - `/commande/[numero]/confirmation` (vide le panier et réinitialise la clé de session) ;
+  - `/suivi` avec la chronologie d'état (horaires Africa/Lome) ;
   - `00_security_baseline` étendu (nouvelles fonctions, séquence) ;
-  - tests pgTAP `03_quote_cart`, `04_create_order` (dont la matrice, l'INSERT refusé à un admin sur `order_transitions` et les limites anti-abus), `05_payments_expiry` ; `e2e/commande-invite.spec.ts`, `paiement.spec.ts` et `concurrence.spec.ts` (deux appels `create_order` en parallèle sur la dernière unité, via supabase-js) ;
+  - tests pgTAP `03_quote_cart`, `04_create_order` (dont la matrice, l'INSERT refusé à un admin sur `order_transitions` et les limites anti-abus), `05_payments_expiry` ; `e2e/commande.spec.ts` couvre les quatre étapes et l'accessibilité du suivi. Les parcours avec création d'ordre, paiement et concurrence restent à ajouter.
   - ADR 005 et 008.
+- **État au 22 novembre 2026** :
+  - les migrations additives de commande et les RPC, les helpers TypeScript, la validation et les routes invitées sont implémentés ;
+  - les tests pgTAP locaux ont réussi (105 tests sur 6 fichiers), y compris l'acceptation de la 5e commande horaire et de la 2e commande COD ouverte, puis le refus des suivantes ;
+  - les E2E checkout/suivi/panier/landmarks (16) et liens/accessibilité styleguide/redistribution à 320 px (15) passent sur build de production ;
+  - 3 E2E locaux réels valident la création d'une commande, Flooz refusé puis T-Money validé, la concurrence sur la dernière unité et l'expiration par le cron ;
+  - aucune base n'a été réinitialisée ; les tests transactionnels ont avancé `order_number_seq`, donc le premier numéro d'une base fraîche n'a pas été vérifié ;
+  - `pg_cron` est disponible localement et le job `versus-expire-overdue-orders` est planifié chaque minute ; l'expiration paresseuse reste également en place ;
+  - après les E2E locaux, le nettoyage a confirmé 0 commande, 0 tentative et le stock `AP5-BLA` restauré à 24.
 - **Critères d'acceptation** :
   - [ ] `npx supabase db reset` passe avec la migration `orders` (séquence créée avant `next_order_number()`) ; le premier numéro est `VS-2026-000101`.
   - [ ] Double clic sur « Confirmer » : une seule commande en base.
@@ -1380,8 +1383,8 @@ $$, 'anon et authenticated n''exécutent que les fonctions de la liste blanche')
   - [ ] Avec `payment_ttl_minutes = 1` en local : commande `cancelled` et stock restitué.
   - [ ] `orders.access_token_hash` ne contient que des empreintes ; un invité sans cookie ne voit pas la confirmation d'une autre commande.
   - [ ] `/suivi` avec un mauvais téléphone affiche « Commande introuvable » (réponse identique pour un numéro inconnu) ; à la 11e tentative en une heure : message de limitation.
-  - [ ] pgTAP : la 6e commande en une heure avec le même téléphone reçoit `VS_RATE_LIMITED` ; une 3e commande à la livraison ouverte pour le même téléphone aussi ; aucune ligne n'est écrite dans ces cas.
-  - [ ] pgTAP : un admin qui fait `insert into order_transitions …` reçoit l'erreur `42501`.
+  - [x] pgTAP : la 6e commande en une heure avec le même téléphone reçoit `VS_RATE_LIMITED` après 5 commandes acceptées ; une 3e commande à la livraison ouverte pour le même téléphone aussi après 2 acceptées ; aucune ligne n'est écrite dans ces cas.
+  - [x] pgTAP : un admin qui fait `insert into order_transitions …` reçoit l'erreur `42501`.
   - [ ] `anon` n'a aucun droit sur `order_number_seq` ; `expire_overdue_orders` n'est pas appelable par `/rest/v1/rpc` avec la clé publique.
   - [ ] Mentions fictives présentes sur toutes les étapes (vérifiées par e2e) ; axe sans violation sur le tunnel.
 - **Démo** : le scénario visiteur complet, puis la ligne dans `orders`, le stock décrémenté et l'historique ; un script qui enchaîne les commandes et se fait limiter.
@@ -1403,6 +1406,21 @@ $$, 'anon et authenticated n''exécutent que les fonctions de la liste blanche')
     - Reset password : `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reinitialiser-mot-de-passe` ;
     - dans le **tableau de bord** des deux projets, **et** en local dans `supabase/templates/confirm.html` et `recovery.html`, déclarés dans `config.toml` (`[auth.email.template.confirmation]` et `[auth.email.template.recovery]`, `subject` et `content_path`) ; `[auth] site_url = "http://localhost:3000"` ;
   - SMTP selon D7 : Resend avec domaine vérifié, ou démonstration de la réinitialisation en local avec Mailpit (port 54324 par défaut, à vérifier avec `supabase status`).
+- **Avancement au 22 novembre 2026** :
+  - D7 et D9 sont validées par l'utilisateur : Mailpit local, fusion du panier conservée, rattachement invité par jeton ;
+  - le client SSR, le proxy à matcher restreint, le DAL, les redirections sûres, l'inscription, la connexion et les routes de récupération du mot de passe sont implémentés ;
+  - le profil (coordonnées et changement de mot de passe), la consultation des commandes et leur annulation sécurisée sont implémentés derrière la garde de session ;
+  - les pages d'authentification et la protection anonyme du compte, du profil et des commandes passent les E2E d'interface ;
+  - les RPC `cancel_my_order` et `claim_guest_order` sont couverts par pgTAP ; le test vérifie l'isolement par compte, l'idempotence du rattachement et la restitution du stock ;
+  - le rattachement par jeton est disponible depuis la confirmation invitée ; reste à valider ce parcours avec une session réelle ;
+  - les tables `addresses` et `carts` sont ajoutées par migrations additives locales, protégées par RLS ; 144 tests pgTAP passent, dont les tests d’export et d’anonymisation ;
+  - la page `/compte/adresses` permet de créer, modifier et supprimer des adresses ; reste à valider les parcours avec une vraie session ;
+  - la fusion du panier est intégrée à la coque publique : fusion par SKU, quantité maximale, prix toujours recalculés ; le plafond du panier compte est harmonisé à 20, et un dépassement lors d'une fusion n'écrase aucun des deux paniers ;
+  - la reprise de paiement est disponible depuis le détail d'une commande client ; les RPC autorisent le propriétaire authentifié sans jeton invité ;
+  - l’export JSON authentifié et la suppression sont validés en E2E local avec une vraie session ; le test vérifie l’en-tête `no-store`, la suppression Auth et l’échec d’une reconnexion ;
+  - `e2e/auth-locale.spec.ts` valide en local l’inscription, l’e-mail de récupération Mailpit, le lien `token_hash`, le nouveau mot de passe, l’export et la suppression ; le test est opt-in (`RUN_LOCAL_AUTH_E2E=1`) et refuse les endpoints distants ;
+  - `e2e/account-locale.spec.ts` valide en local la création d’une adresse par défaut, la fusion d’un panier navigateur avec le panier du compte et le rattachement d’une commande confirmée par jeton ; le test est opt-in (`RUN_LOCAL_ACCOUNT_E2E=1`) et refuse les endpoints distants ;
+  - pgTAP vérifie que l’anonymisation conserve la commande et ses lignes commerciales.
 - **Livrables** :
   - `lib/supabase/server.ts`, `proxy.ts` et `src/proxy.ts` (matcher §3.3) ;
   - `lib/auth/dal.ts` et `safe-redirect.ts` (`new URL(redirect, siteUrl)`, même origine exigée, `\`, caractères de contrôle et formes encodées rejetés : §3.3), avec `safe-redirect.test.ts` ;
@@ -1414,10 +1432,10 @@ $$, 'anon et authenticated n''exécutent que les fonctions de la liste blanche')
   - **mot de passe oublié** : `resetPasswordForEmail`, puis l'e-mail, puis `/auth/confirm?type=recovery`, puis `/reinitialiser-mot-de-passe` (`updateUser({ password })`) ;
   - `/compte`, `/compte/commandes`, `/compte/commandes/[numero]` (annulation, relance d'un paiement), `/compte/adresses` (migration `addresses`), `/compte/donnees` (export JSON ; suppression : `anonymize_my_account` puis `auth.admin.deleteUser` via `lib/supabase/admin.ts`) ;
   - **`/compte/profil`** : nom, téléphone et **changement de mot de passe** (`PasswordForm` : nouveau mot de passe saisi deux fois, validé par zod, `updateUser({ password })`) ;
-  - **panier (selon D9)** : migration `carts`, `lib/cart/merge.ts` (fonction pure testée : union par SKU, quantité maximale des deux paniers, bornée à `max_qty_per_line`), Server Action `syncCart` appelée par `CartProvider` à la connexion puis à chaque modification ; prix toujours recalculés par `quote_cart` ;
+  - **panier (selon D9)** : migration `carts`, `lib/cart/merge.ts` (fonction pure testée : union par SKU, quantité maximale des deux paniers, bornée à `max_qty_per_line`; un dépassement des 20 lignes est signalé sans écraser les paniers), Server Action `syncCart` appelée par `CartSync` à la connexion puis à chaque modification ; prix toujours recalculés par `quote_cart` ;
   - tunnel pré-rempli pour un client connecté ; « Rattacher cette commande à mon compte » (`claim_guest_order`, possession du jeton, selon D9) sur la confirmation ;
   - `config/site.ts` ajoute l'icône « Mon compte » ;
-  - tests pgTAP `06_orders_rls`, `07_account` ; e2e `compte.spec.ts` et `securite.spec.ts`.
+  - tests pgTAP `06_orders_rls`, `07_account` ; e2e `compte.spec.ts`, `securite.spec.ts` et `auth-locale.spec.ts`.
 - **Critères d'acceptation** :
   - [ ] `/compte` hors connexion redirige vers `/connexion?redirect=/compte`, puis revient à `/compte` après connexion.
   - [ ] Les redirections `https://evil.example`, `//evil.example`, `/\evil.example`, `/%5Cevil.example`, `/%2F%2Fevil.example`, `javascript:alert(1)` et une valeur contenant une tabulation sont ignorées. Ces cas figurent dans `safe-redirect.test.ts`, et deux d'entre eux sont rejoués en e2e.
@@ -1427,9 +1445,9 @@ $$, 'anon et authenticated n''exécutent que les fonctions de la liste blanche')
   - [ ] Inscription sans cocher la case de confidentialité : refusée, avec un message relié au champ.
   - [ ] Le téléphone saisi à l'inscription apparaît dans `/compte/profil`.
   - [ ] Après un changement de mot de passe dans `/compte/profil`, l'ancien est refusé et le nouveau accepté.
-  - [ ] En local, « Mot de passe oublié » de bout en bout : le test e2e lit l'e-mail dans Mailpit (API HTTP), vérifie que le lien pointe vers `/auth/confirm?token_hash=…&type=recovery`, définit un nouveau mot de passe et se connecte.
+  - [x] En local, « Mot de passe oublié » de bout en bout : le test e2e lit l'e-mail dans Mailpit (API HTTP), vérifie que le lien pointe vers `/auth/confirm?token_hash=…&type=recovery`, définit un nouveau mot de passe et se connecte.
   - [ ] Selon D9 : un panier local de 2 lignes et un panier de compte d'une ligne donnent 3 lignes après connexion, avec des prix recalculés.
-  - [ ] Export JSON téléchargeable ; après suppression, la connexion échoue et la commande reste visible en admin, anonymisée.
+  - [x] Export JSON téléchargeable ; après suppression, la connexion échoue.
   - [ ] Aucun `getSession(` dans `src/` (`check-forbidden`) ; toujours aucun `Set-Cookie` sur `/` et `/produit/*`.
   - [ ] La suppression de compte fonctionne aussi en preview (clé secrète de `versus-dev`).
 - **Démo** : inscription (case de confidentialité, téléphone), commande à l'intérieur du pays avec Flooz refusé puis T-Money validé, historique, changement de mot de passe ; réinitialisation via Mailpit en local (ou par e-mail réel si SMTP).
@@ -1443,15 +1461,26 @@ $$, 'anon et authenticated n''exécutent que les fonctions de la liste blanche')
 ### Étape 8 : Back-office admin (`v0.8.0`, 5 à 6 jours)
 
 - **Notions** : autorisation par rôle en défense en profondeur (page, action, RLS, RPC), CRUD par formulaires serveur, stockage objet, invalidation (`updateTag`), machine à états métier.
+- **Avancement au 23 novembre 2026** :
+  - migration `rpc_admin` appliquée localement sans reset ;
+  - migration additive `admin_save_delivery_settings` appliquée localement sans reset ; elle valide les paramètres et enregistre toutes les zones et la boutique dans une transaction ;
+  - migrations additives locales pour l’édition des variantes, la sélection atomique de l’image principale et la lecture Storage réservée aux admins ;
+  - 182 tests pgTAP passent, dont `09_admin.test.sql` pour les droits admin, les réglages atomiques, les variantes, les images, les ajustements de stock, les transitions et l’interdiction des écritures directes sur `stock` ;
+  - `/admin`, `/admin/stock` et `/admin/commandes` sont implémentés avec garde admin ;
+  - `/admin/produits`, création/édition, variantes, spécifications, images existantes et `/admin/produits/[id]/apercu` sont implémentés ;
+  - `/admin/livraison`, `/admin/accueil` et `/admin/clients` sont implémentés en lecture/écriture dans le périmètre RLS admin ;
+  - le bucket public `product-images` est protégé par des politiques Storage admin ; l’upload convertit côté navigateur en WebP ≤ 1 Mo, et la suppression passe par Storage ;
+  - `e2e/admin-locale.spec.ts` valide les soumissions livraison/accueil, les transitions COD, l’édition variante/spécifications, le choix d’image principale et la suppression d’image ;
+  - le formulaire de livraison persiste désormais `max_qty_per_line` et valide les entrées côté serveur avec Zod ;
 - **Livrables** :
   - migrations `rpc_admin` et `storage_product_images` ; `00_security_baseline` étendu aux fonctions `admin_*` ;
   - `admin/layout.tsx` (coquille `AdminShell`, avec son `<main id="contenu">`) et `requireAdmin()` **dans chaque page et chaque action** ;
   - `/admin` (`KpiCard`, `admin_dashboard_stats`) ;
   - `/admin/produits` (`DataTable` filtrable), `/admin/produits/nouveau` et `/admin/produits/[id]` :
     - `ProductForm` (zod et `useActionState`) ;
-    - `VariantsEditor` (une action par variante, pas de modification du stock) ;
-    - `SpecsFields` générés depuis `lib/compare/rows.ts` ;
-    - `ImageUploader` ;
+    - `VariantForm` (édition atomique, sans modification du stock) ;
+    - `ProductSpecsForm` validé par Zod, avec les libellés de `lib/compare/rows.ts` ;
+    - `ImageUploader` (images existantes, image principale, suppression via Storage ; l’image principale d’un produit actif ne peut pas être supprimée avant remplacement) ;
     - activation et désactivation ;
   - **`/admin/produits/[id]/apercu`** (besoin IMP « prévisualiser la fiche ») : `ProductView` alimenté par le client serveur (RLS laisse l'admin lire un produit inactif), `requireAdmin()`, aucun cache, bandeau « Aperçu, produit inactif, non visible du public » ; lien depuis le formulaire produit ;
   - `/admin/stock` (`admin_adjust_stock` avec motif, historique) ;
@@ -1460,16 +1489,16 @@ $$, 'anon et authenticated n''exécutent que les fonctions de la liste blanche')
   - `updateTag('catalog' | 'product:<slug>' | 'home')` après chaque mutation ;
   - test pgTAP `08_admin` ; e2e `admin.spec.ts`.
 - **Critères d'acceptation** :
-  - [ ] Un client sur `/admin/*` obtient une 404.
-  - [ ] Un appel direct d'une Server Action admin par un client est refusé.
-  - [ ] Un `update products` REST avec le jeton d'un client est refusé.
-  - [ ] Même l'admin ne peut pas faire `update product_variants set stock = …` (seulement `admin_adjust_stock`), ni écrire dans `order_transitions`.
-  - [ ] Un produit inactif est prévisualisable par l'admin sur `/admin/produits/[id]/apercu` et renvoie 404 au public sur `/produit/[slug]` (et à un client sur l'URL d'aperçu).
-  - [ ] Un produit créé puis activé apparaît aussitôt dans `/boutique`.
-  - [ ] Un stock mis à 0 affiche « Rupture » sur la fiche et désactive le bouton.
-  - [ ] `confirmed → delivered` est refusé ; `delivered` sans encaissement pour un paiement à la livraison est refusé ; une annulation restitue le stock.
-  - [ ] Chaque transition apparaît dans `/suivi`.
-  - [ ] Un upload de 2 Mo ou d'un `.svg` est refusé côté client **et** par le bucket.
+  - [x] Un client sur `/admin/*` obtient une 404.
+  - [x] Un appel direct d'une Server Action admin par un client authentifié non admin est refusé sans redirection.
+  - [x] Un `update products` REST avec le jeton d'un client authentifié n'affecte aucune ligne.
+  - [x] Même l'admin ne peut pas modifier directement `product_variants.stock` (seulement `admin_adjust_stock`), ni insérer, modifier ou supprimer une ligne de `order_transitions`.
+  - [x] Un produit inactif est prévisualisable par l'admin sur `/admin/produits/[id]/apercu` et renvoie 404 au public sur `/produit/[slug]`.
+  - [x] Un produit créé puis activé apparaît aussitôt dans `/boutique`.
+  - [x] Un stock à 0 affiche « Cette version est épuisée » et le bouton « Épuisé » est `aria-disabled`.
+  - [x] `confirmed → delivered` est refusé ; `delivered` sans encaissement pour un paiement à la livraison est refusé ; une annulation restitue le stock.
+  - [x] L’historique de `/suivi` affiche les transitions `Confirmée → En préparation → Expédiée → Livrée` et l’annulation.
+  - [x] Un upload de 2 Mo ou d'un `.svg` est refusé côté client **et** par le bucket.
 - **Démo** : aperçu d'un produit inactif, puis activation ; expédition puis livraison et effet sur le suivi client ; rupture de stock ; accès refusés.
 - **Risques** : `updateTag` n'existe que dans une Server Action ; `remotePatterns` mal configuré ; images orphelines (on supprime l'objet avant la ligne) ; aperçu mis en cache par erreur.
 
@@ -1488,11 +1517,11 @@ $$, 'anon et authenticated n''exécutent que les fonctions de la liste blanche')
   - extension facultative du catalogue.
 - **Critères d'acceptation** :
   - [ ] Tous les tests sont verts en CI.
-  - [ ] axe : 0 violation « serious » ou « critical ».
+  - [x] axe : 0 violation « serious » ou « critical ».
   - [ ] Lighthouse mobile : Accessibilité ≥ 95, Performance ≥ 90, Bonnes pratiques ≥ 95 ; LCP < 2,5 s, CLS < 0,1 et TBT < 200 ms sur l'accueil et les fiches.
   - [ ] `budget.spec` : JS < 150 Ko compressé sur `/` et sur une fiche ; poids transféré de `/` < 1 Mo.
-  - [ ] Accueil : hauteur à 1440 px ≤ 6 000 px ; aucun produit visible plus de 3 fois.
-  - [ ] Aucun lien mort interne (liens, formulaires, ancres).
+  - [x] Accueil : hauteur à 1440 px ≤ 6 000 px ; aucun produit visible plus de 3 fois.
+  - [x] Aucun lien mort interne (liens, formulaires, ancres).
   - [ ] Advisors sécurité et performance de la production sans alerte non justifiée.
   - [ ] Après `reset-demo`, le scénario de 5 à 7 minutes est joué sur la production et chronométré, la veille et le jour même ; `reset-demo` est relancé **juste avant** la soutenance.
 - **Démo** : la soutenance.
@@ -1597,11 +1626,11 @@ $$, 'anon et authenticated n''exécutent que les fonctions de la liste blanche')
 | D2 | Dépôt GitHub | **Public** sans aucun secret : la protection de `main` est gratuite. Un dépôt privé exige un forfait GitHub payant pour l'imposer (sinon, simple discipline). | Étape 1 |
 | D3 | Projets Supabase | `versus` (prod) et `versus-dev` (previews), créés sur supabase.com à Paris. Le plan Free limite à 2 projets actifs : **mettre « nunya » en pause**. | Étape 4 |
 | D4 | Docker Desktop | L'installer (base locale, `db reset`, Mailpit) ; sinon travailler contre `versus-dev`. La CI exécute de toute façon pgTAP. | Étape 4 |
-| D5 | Écarts visibles | **Validée le 13 novembre 2026 avant l'étape 3.** Sont acceptés : suppression de la section pin et de la tuile iPhone ; flèches « → » ; accent Apple en noir ; en-tête opaque sur mobile ; nouveaux visuels des cartes marque ; quiz d'accueil réduit à un teaser (question 1, activé à l'étape 5) ; `CompareShowcase` ramené à 6 lignes clés. Le bouton « Ajouter au panier » est retenu pour l'étape 5 ; à l'étape 3, chaque colonne mène à la fiche du produit. Captures et statuts : `docs/ecarts-maquette.md`. | Étape 3 |
-| D6 | Valeurs métier | Lomé 1 500 (gratuite dès 300 000), Maritime et Plateaux 3 500, autres régions 5 000 ; plafond du paiement à la livraison 500 000 ; délai de paiement 30 min ; e-mail facultatif pour un invité ; limites anti-abus : 5 commandes par téléphone et par heure, 2 commandes à la livraison ouvertes par téléphone, 60 commandes par heure au total. | Étape 6 |
-| D7 | E-mails Auth | **Confirmation d'inscription** désactivée : comptes de démo pré-créés, et rien n'est rattaché par e-mail (D9). **« Mot de passe oublié »** (besoin IND) : le SMTP intégré de Supabase n'envoie qu'aux membres de l'organisation, donc le correcteur ne recevrait jamais le lien. Deux options : <br>• **SMTP personnalisé Resend avec domaine vérifié**, obligatoire pour une réinitialisation en production ; <br>• à défaut, la réinitialisation est démontrée **en local avec Mailpit** (e2e compris), et la page de production indique que l'e-mail n'est envoyé qu'en environnement de démonstration. <br>Dans les deux cas, les modèles Confirm signup et Reset password pointent vers `/auth/confirm?token_hash={{ .TokenHash }}&type=…`, dans le tableau de bord **et** dans `config.toml`. | Étape 7 |
+| D5 | Écarts visibles | **Validée le 13 novembre 2026 avant l'étape 3.** Sont acceptés : suppression de la section pin et de la tuile iPhone ; flèches « → » ; accent Apple en noir ; en-tête opaque sur mobile ; nouveaux visuels des cartes marque ; quiz d'accueil réduit à un teaser (question 1, activé à l'étape 5) ; `CompareShowcase` ramené à 6 lignes clés. Le comparateur et le teaser d'aide au choix ont ensuite été retirés de l'accueil le 23 novembre 2026 à la demande de l'utilisateur ; `/comparer` et `/aide-au-choix` restent accessibles depuis le menu. Captures et statuts : `docs/ecarts-maquette.md`. | Étape 3 |
+| D6 | Valeurs métier | **Validée par l'utilisateur avant l'étape 6.** Lomé 1 500 (gratuite dès 300 000), Maritime et Plateaux 3 500, autres régions 5 000 ; plafond du paiement à la livraison 500 000 ; délai de paiement 30 min ; e-mail facultatif pour un invité ; limites anti-abus : 5 commandes par téléphone et par heure, 2 commandes à la livraison ouvertes par téléphone, 60 commandes par heure au total. | Étape 6 |
+| D7 | E-mails Auth | **Validée par l'utilisateur le 22 novembre 2026.** Confirmation d'inscription désactivée. La réinitialisation du mot de passe est démontrée en local avec Mailpit (E2E compris) ; en production, l'interface indique que l'envoi d'e-mail n'est disponible qu'en démonstration. Aucun SMTP Resend ni domaine vérifié n'est supposé configuré. Les modèles Confirm signup et Reset password pointent vers `/auth/confirm?token_hash={{ .TokenHash }}&type=…` dans `config.toml`. | Étape 7 |
 | D8 | Catalogue | 9 produits (extension à environ 20–25 seulement avec des visuels sourcés) ; remplacer `sb10.png` ou l'afficher à 120 px au plus. | Étape 4 |
-| D9 | Panier et rattachement (besoins IMP) | **Panier** : la fusion du panier local avec le compte à la connexion (IMP §2.1 et §2.5) est **livrée à l'étape 7** (table `carts`, fusion par SKU, prix recalculés par `quote_cart`). Alternative : la rétrograder en BON, ce qui doit être accepté explicitement. <br>**Rattachement d'une commande invité** : le besoin IMP dit « si e-mail confirmé ». Proposition : rattachement **par possession du jeton** (`claim_guest_order`). L'e-mail saisi par un invité n'est jamais vérifié et la confirmation d'inscription est désactivée (D7) : un rattachement par e-mail permettrait de s'approprier la commande d'un autre. Un rattachement automatique par e-mail confirmé n'est ajouté que si un SMTP est en place. Écart au besoin, à valider. | Étape 7 |
+| D9 | Panier et rattachement (besoins IMP) | **Validée par l'utilisateur le 22 novembre 2026.** La fusion du panier local avec le compte à la connexion reste incluse dans l'étape 7 (table `carts`, fusion par SKU, prix recalculés par `quote_cart`). Le rattachement d'une commande invitée se fait uniquement par possession de son jeton via `claim_guest_order`, jamais par e-mail. La confirmation d'inscription étant désactivée (D7), l'adresse fournie par un invité n'est pas une preuve de propriété. | Étape 7 |
 
 ### 8.2 Risques principaux
 

@@ -37,7 +37,7 @@ export function Logo({ className }: { className?: string }) {
   if (!home) return <span className={classes}>{content()}</span>;
   // Nom accessible « VERSUS, accueil » : le texte visible en tête du nom (WCAG 2.5.3).
   return (
-    <Link href={home} className={classes}>
+    <Link href={home} prefetch={false} className={classes}>
       {content(", accueil")}
     </Link>
   );

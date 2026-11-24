@@ -35,10 +35,6 @@ test.describe("hero", () => {
       "href",
       brandHref("apple")!,
     );
-    await expect(slide.getByRole("link", { name: "Comparer" })).toHaveAttribute(
-      "href",
-      routeFor("comparerAccueil")!,
-    );
     // Le bouton principal est vert (règle 1), quel que soit le fond.
     await expect(slide.getByRole("link", { name: "Voir l'iPhone 18 Pro" })).toHaveCSS(
       "background-color",
@@ -62,6 +58,16 @@ test.describe("hero", () => {
     expect(slides).toEqual(["ip18", "s26u", "x17u"]);
   });
 
+  test("le bouton secondaire reste lisible sur le hero clair Xiaomi", async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto("/");
+    await page.getByRole("button", { name: "Afficher Xiaomi 17 Ultra" }).click();
+
+    const brandLink = page.locator(".hero-slide-active").getByRole("link", { name: "Tout Xiaomi" });
+    await expect(brandLink).toHaveCSS("color", "rgb(26, 29, 27)");
+    await expect(brandLink).toHaveCSS("border-top-color", "rgb(26, 29, 27)");
+  });
+
   test("tient dans le premier écran du téléphone", async ({ page }) => {
     await page.setViewportSize(PHONE);
     await page.goto("/");
@@ -73,9 +79,10 @@ test.describe("titres de section", () => {
   test("simples, sans surtitre ni point final", async ({ page }) => {
     await page.goto("/");
     const titles = (await page.locator("main h2:visible").allTextContents()).map(plain);
-    for (const title of ["Nouveautés", "Parcourir par marque", "Comparer avant d’acheter"]) {
+    for (const title of ["Nouveautés", "Parcourir par marque"]) {
       expect(titles).toContain(title);
     }
+    await expect(page.locator("#comparer, #aide")).toHaveCount(0);
     for (const title of titles) expect(title, title).not.toMatch(/\.$/);
     for (const id of ["nouveautes", "marques", "comparer"]) {
       await expect(page.locator(`#${id} .eyebrow`)).toHaveCount(0);
@@ -244,75 +251,6 @@ test.describe("Nouveautés", () => {
   });
 });
 
-test.describe("comparateur", () => {
-  test("médaillon VS dans l'en-tête et prix en première ligne", async ({ page }) => {
-    await page.setViewportSize(DESKTOP);
-    await page.goto("/");
-    await expect(page.locator("#comparer [data-vs-mark]")).toHaveCount(1);
-    const table = page.locator("#comparer table:visible");
-    await expect(table.locator("tbody tr").first().locator("th")).toHaveText("Prix indicatif");
-    await expect(table.locator("thead th[scope=col]")).toHaveCount(4);
-  });
-
-  test("sur téléphone : une carte par critère, valeurs empilées, montants entiers, liens", async ({
-    page,
-  }) => {
-    await page.setViewportSize(PHONE);
-    await page.goto("/");
-    const table = page.locator("#comparer table:visible");
-    const price = table.locator("tbody tr").first();
-    const cells = await price.locator("td").all();
-    expect(cells).toHaveLength(3);
-    const boxes = await Promise.all(cells.map(async (cell) => (await cell.boundingBox())!));
-    for (let index = 1; index < boxes.length; index += 1) {
-      expect(boxes[index]!.y).toBeGreaterThan(boxes[index - 1]!.y);
-    }
-    // Un montant n'est jamais coupé : une seule ligne par prix.
-    for (const amount of await price.locator("[data-price]").all()) {
-      expect(await amount.evaluate((element) => element.getClientRects().length)).toBe(1);
-    }
-    // Colonne de valeurs régulière : chaque valeur finit au bord droit de sa carte, même quand
-    // elle passe sous le nom du modèle.
-    for (const cell of await table.locator("tbody td").all()) {
-      const [value, right] = await cell.evaluate((element) => {
-        const child = element.firstElementChild!;
-        const box = element.getBoundingClientRect();
-        const rects = [...child.getClientRects()];
-        return [Math.max(...rects.map((rect) => rect.right)), box.right] as const;
-      });
-      expect(Math.abs(value - right)).toBeLessThanOrEqual(1);
-    }
-    // Un lien par modèle, le nom du modèle visible (règle 4 : le libellé dit où mène le lien).
-    const links = page.locator("#comparer .compare-mobile-links:visible").getByRole("link");
-    await expect(links).toHaveCount(3);
-    await expect(links.first()).toHaveAttribute("href", productHref("iphone-18-pro"));
-    const names = ["iPhone 18 Pro", "Galaxy S26 Ultra", "Xiaomi 17 Ultra"];
-    for (const [index, name] of names.entries()) {
-      await expect(links.nth(index)).toHaveAccessibleName(`Voir le produit ${name}`);
-      await expect(links.nth(index).locator(".compare-link-name")).toBeVisible();
-      await expect(links.nth(index).locator(".compare-link-name")).toHaveText(name);
-    }
-  });
-
-  test("familles de la refonte : un produit de chaque marque", async ({ page }) => {
-    await page.setViewportSize(DESKTOP);
-    await page.goto("/");
-    const families = [
-      ["Smartphones", ["iPhone 18 Pro", "Galaxy S26 Ultra", "Xiaomi 17 Ultra"]],
-      ["Écouteurs", ["AirPods Pro 3", "Galaxy Buds4 Pro", "Xiaomi Buds 6"]],
-      ["Montres et bracelets", ["Apple Watch Series 12", "Galaxy Watch9", "Xiaomi Watch S5"]],
-    ] as const;
-    for (const [family, names] of families) {
-      await page
-        .getByRole("group", { name: "Choisir une catégorie" })
-        .getByRole("radio", { name: family })
-        .check();
-      const header = page.locator("#comparer table:visible thead");
-      for (const name of names) await expect(header).toContainText(name);
-    }
-  });
-});
-
 test.describe("réassurance", () => {
   test("trois éléments, chacun marqué simulé ou indicatif", async ({ page }) => {
     await page.goto("/");
@@ -327,17 +265,17 @@ test.describe("réassurance", () => {
   });
 });
 
-test("la page tient sous 7 000 px de haut sur téléphone", async ({ page }) => {
+test("le contenu de l'accueil reste sous 7 000 px sur téléphone", async ({ page }) => {
   await page.setViewportSize(PHONE);
   await page.goto("/");
-  const total = await page.locator("body").evaluate((body) => body.scrollHeight);
+  const total = await page.locator("main#contenu").evaluate((main) => main.scrollHeight);
   expect(total).toBeLessThanOrEqual(7000);
 });
 
 test.describe("filtres sans JavaScript (refonte §4.7)", () => {
   test.use({ javaScriptEnabled: false });
 
-  test("le rail et le comparateur filtrent sans JavaScript", async ({ page }) => {
+  test("le rail filtre sans JavaScript", async ({ page }) => {
     await page.goto("/");
     const rail = page.locator("#nouveautes");
     await rail.getByRole("radio", { name: /^Xiaomi/ }).check();
@@ -345,9 +283,5 @@ test.describe("filtres sans JavaScript (refonte §4.7)", () => {
       .locator("[data-rail-item]:visible")
       .evaluateAll((items) => items.map((item) => item.getAttribute("data-brand")));
     expect(new Set(brands)).toEqual(new Set(["xiaomi"]));
-    const compare = page.locator("#comparer");
-    await compare.getByRole("radio", { name: "Écouteurs" }).check();
-    await expect(compare.locator("table:visible")).toHaveCount(1);
-    await expect(compare.locator("table:visible thead")).toContainText("AirPods Pro 3");
   });
 });

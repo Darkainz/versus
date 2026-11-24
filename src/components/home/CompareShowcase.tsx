@@ -1,9 +1,11 @@
 import type { CSSProperties } from "react";
+import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import { ProductVisual } from "@/components/product/ProductVisual";
+import { buttonClasses } from "@/components/ui/button-styles";
 import { Price } from "@/components/ui/Price";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { VsMark } from "@/components/ui/VsMark";
-import { productHref } from "@/config/site";
+import { productHref, routeFor } from "@/config/site";
 import { brandThemes } from "@/lib/brand-themes";
 import type { CatalogCategory, CompareGroup, HomeEntry } from "@/lib/catalog/types";
 import { homeRows } from "@/lib/compare/rows";
@@ -24,8 +26,24 @@ function fullName(product: { brand_name: string; name: string }) {
     : `${product.brand_name} ${product.name}`;
 }
 
+function AddHomeProductToCart({ product }: { product: HomeEntry["product"] }) {
+  const variant = product.variants.find((item) => item.is_default && item.is_active);
+  if (!variant) return null;
+
+  return (
+    <AddToCartButton
+      sku={variant.sku}
+      name={product.name}
+      stock={variant.stock}
+      cartHref={routeFor("panier")}
+      className={buttonClasses({ size: "md", className: "w-full" })}
+    />
+  );
+}
+
 /**
- * Comparateur de l'accueil (refonte, §3.1 et §4.7), section `#comparer`. Un vrai `<table>` par
+ * Ancienne section de comparaison de l'accueil, conservée mais non montée depuis le 23 novembre
+ * 2026. Si elle est réutilisée, elle rend un vrai `<table>` par
  * famille, lignes clés de `lib/compare/rows.ts` (`home: true`, le prix en premier), produits
  * issus de `home_slots` (« compare ») : iPhone 18 Pro / Galaxy S26 Ultra / Xiaomi 17 Ultra, etc.
  * - à partir de 641 px : tableau, colonne de produit avec photo et « Voir le produit » ;
@@ -96,6 +114,7 @@ export function CompareShowcase({
                       <a className="compare-link" href={productHref(product.slug)}>
                         Voir le produit<span className="sr-only"> {product.name}</span>
                       </a>
+                      <AddHomeProductToCart product={product} />
                     </th>
                   ))}
                 </tr>
@@ -138,6 +157,7 @@ export function CompareShowcase({
                       Voir le produit <strong className="compare-link-name">{product.name}</strong>
                     </span>
                   </a>
+                  <AddHomeProductToCart product={product} />
                 </li>
               ))}
             </ul>

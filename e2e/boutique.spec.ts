@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { brands, products } from "../src/data/catalog";
 import { brandNames, productCount } from "../src/lib/catalog/summary";
 
-/** Catalogue de la refonte (lot 1) : 30 produits, 10 par marque, comptes calculés. */
+/** Catalogue de démonstration élargi ; les comptes sont calculés depuis la source de données. */
 test.describe("boutique", () => {
   test("affiche tout le catalogue, avec un compte calculé", async ({ page }) => {
     await page.goto("/boutique");
@@ -25,6 +25,19 @@ test.describe("boutique", () => {
     for (const product of products) {
       const response = await request.get(`/produit/${product.slug}`);
       expect(response.status(), product.slug).toBe(200);
+    }
+  });
+
+  test("l'ancre de la famille smartphones est présente sur la boutique", async ({ page }) => {
+    await page.goto("/boutique#smartphones");
+    await expect(page.locator("#smartphones")).toBeVisible();
+  });
+
+  test("les pages publiques ne définissent aucun cookie", async ({ request }) => {
+    for (const path of ["/", "/produit/iphone-18-pro"]) {
+      const response = await request.get(path);
+      expect(response.status(), path).toBe(200);
+      expect(response.headers()["set-cookie"], path).toBeUndefined();
     }
   });
 

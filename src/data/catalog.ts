@@ -5,11 +5,14 @@ import type {
   ProductDetail,
   ProductVariant,
 } from "@/lib/catalog/types";
+import { additionalProducts } from "./additional-products";
 
 /**
- * Catalogue de démonstration : 30 produits, 10 par marque (refonte, lot 1). Prix indicatifs :
+ * Catalogue de démonstration : 103 produits. Prix indicatifs :
  * prix officiel en France × 655,957, arrondi au millier de FCFA (relevés des 16 et 17/11/2026,
- * détail dans `docs/plans/produits-recherche.json` et `public/products/SOURCES.md`).
+ * détail dans `docs/plans/produits-recherche.json` et `public/products/SOURCES.md`). Les modèles
+ * ajoutés et leurs sources officielles sont décrits dans `additional-products.ts`; leurs prix sont
+ * estimatifs et leurs visuels utilisent le SVG de secours.
  * `new_until` = `release_date` + 90 jours, comme le trigger `products_defaults`.
  *
  * Conventions : coloris officiels de la marque, en minuscules après le premier mot (« Bleu clair »,
@@ -1333,6 +1336,7 @@ export const products: readonly ProductDetail[] = [
       specs_note: NOTE,
     },
   },
+  ...additionalProducts,
 ];
 
 export const homeSlots: readonly HomeSlot[] = [

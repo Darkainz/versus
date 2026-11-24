@@ -4,9 +4,10 @@ import { plannedPathFor, routeFor, routeKeys } from "../src/config/site";
 import { products } from "../src/data/catalog";
 import { isNew } from "../src/lib/catalog/is-new";
 
-/** Pages publiques livrées (étapes 1 à 3, refonte, panier). */
+/** Pages publiques livrées (étapes 1 à 5, refonte, panier). */
 const PAGES = [
   "/",
+  "/aide-au-choix",
   "/boutique",
   "/produit/iphone-18-pro",
   "/marques/apple",
@@ -228,7 +229,9 @@ test("rail : flèches inactives aux extrémités et utilisables au clavier", asy
   await expect.poll(() => list.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
 });
 
-test("chaque élément « masqué » de la table de l'étape 3 est absent du DOM", async ({ page }) => {
+test("les routes non livrées restent masquées et les outils disponibles sont accessibles", async ({
+  page,
+}) => {
   await page.goto("/");
   // Aucune route non livrée n'est visée par un lien ou un formulaire (liste issue de routeFor).
   for (const key of routeKeys.filter((routeKey) => routeFor(routeKey) === null)) {
@@ -243,28 +246,34 @@ test("chaque élément « masqué » de la table de l'étape 3 est absent du DOM
     ];
     await expect(page.locator(selectors.join(", ")), `route ${key} (${path})`).toHaveCount(0);
   }
-  // QuizTeaser (#aide) et son formulaire GET.
-  await expect(page.locator("#aide, form[action='/aide-au-choix']")).toHaveCount(0);
-  // Le hero ouvre le comparateur de l'accueil ; aucune tuile n'a de lien concurrent.
+  // Le teaser est retiré de l'accueil ; l'aide au choix reste accessible depuis le menu.
+  await expect(page.locator("#aide")).toHaveCount(0);
+  // Le comparateur n'est plus affiché à l'accueil ; il reste dans le menu.
   await expect(
     page.locator(".hero-slide-active").getByRole("link", { name: "Comparer" }),
-  ).toHaveAttribute("href", routeFor("comparerAccueil")!);
+  ).toHaveCount(0);
   await expect(page.locator(".promo-grid").getByRole("link", { name: /comparer/i })).toHaveCount(0);
-  // Cartes : « + Comparer » ; comparateur : panier et lien complet ; CategoryNav : aide au choix.
-  for (const name of [
-    /\+ ?Comparer/,
-    /Comparateur complet/,
-    /Ajouter au panier/,
-    /Aide au choix/,
-  ]) {
-    await expect(page.getByRole("link", { name })).toHaveCount(0);
-    await expect(page.getByRole("button", { name })).toHaveCount(0);
-  }
-  // En-tête : Rechercher, Comparateur et Mon compte restent masqués ; le panier est livré.
+  // En-tête : recherche, comparateur et compte sont livrés.
   const header = page.getByRole("banner");
-  for (const name of ["Rechercher", "Comparateur", "Mon compte"]) {
-    await expect(header.getByRole("link", { name })).toHaveCount(0);
-  }
+  await expect(header.getByRole("link", { name: "Rechercher" })).toHaveAttribute(
+    "href",
+    "/recherche",
+  );
+  await expect(header.getByRole("link", { name: "Mon compte" })).toHaveAttribute(
+    "href",
+    routeFor("compte")!,
+  );
+  await expect(header.getByRole("link", { name: "Comparateur" })).toHaveAttribute(
+    "href",
+    "/comparer",
+  );
+  await expect(header.getByRole("link", { name: "Aide au choix" })).toHaveAttribute(
+    "href",
+    "/aide-au-choix",
+  );
+  await header.getByRole("link", { name: "Aide au choix" }).click();
+  await expect(page).toHaveURL(/\/aide-au-choix$/);
+  await page.goto("/");
   await expect(header.getByRole("button", { name: "Panier" })).toHaveAttribute(
     "aria-haspopup",
     "dialog",
@@ -274,11 +283,18 @@ test("chaque élément « masqué » de la table de l'étape 3 est absent du DOM
   for (const name of ["FAQ", "Contact", "À propos"]) {
     await expect(footer.getByRole("link", { name, exact: true })).toHaveCount(0);
   }
+  await expect(footer.getByRole("link", { name: "Aide au choix", exact: true })).toHaveAttribute(
+    "href",
+    "/aide-au-choix",
+  );
   // La navigation par catégories ne contient que les familles disponibles.
   await expect(page.getByRole("navigation", { name: "Catégories" }).getByRole("link")).toHaveCount(
     4,
   );
-  await expect(page.locator("#comparer")).toHaveCount(1);
+  await expect(page.locator("#comparer")).toHaveCount(0);
+  await header.getByRole("link", { name: "Comparateur" }).click();
+  await expect(page).toHaveURL(/\/comparer$/);
+  await expect(page.getByRole("table")).toBeVisible();
 });
 
 test("l'accueil présente le catalogue avec des prix, des comptes et des liens uniques", async ({

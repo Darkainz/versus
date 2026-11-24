@@ -3,13 +3,24 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { CarouselControls } from "./CarouselControls";
 
-const icons = { previous: "‹", next: "›" };
+const icons = { previous: "‹", next: "›", play: "play", pause: "pause" };
 const names = ["iPhone 18 Pro", "Galaxy S26 Ultra", "Xiaomi 17 Ultra"];
 
-function setup(active = 1) {
+function setup(active = 1, autoplay = false, paused = false) {
   const onSelect = vi.fn();
-  render(<CarouselControls names={names} active={active} icons={icons} onSelect={onSelect} />);
-  return onSelect;
+  const onTogglePause = vi.fn();
+  render(
+    <CarouselControls
+      names={names}
+      active={active}
+      icons={icons}
+      autoplay={autoplay}
+      paused={paused}
+      onSelect={onSelect}
+      onTogglePause={onTogglePause}
+    />,
+  );
+  return { onSelect, onTogglePause };
 }
 
 describe("CarouselControls", () => {
@@ -28,10 +39,25 @@ describe("CarouselControls", () => {
     }
   });
 
-  it("n'a ni bouton de lecture ni barre de progression (aucun défilement automatique)", () => {
+  it("n'affiche pas la commande lecture/pause quand la rotation est désactivée", () => {
     setup();
-    expect(screen.queryByRole("button", { name: /défilement|lecture|pause/i })).toBeNull();
+    expect(screen.queryByRole("button", { name: /défilement automatique/i })).toBeNull();
     expect(screen.getAllByRole("button")).toHaveLength(5);
+  });
+
+  it("expose une commande lecture/pause accessible lorsque la rotation est active", async () => {
+    const user = userEvent.setup();
+    const { onTogglePause } = setup(1, true);
+    const pause = screen.getByRole("button", { name: "Mettre le défilement automatique en pause" });
+    await user.click(pause);
+    expect(onTogglePause).toHaveBeenCalledOnce();
+  });
+
+  it("nomme la commande de reprise quand la rotation est en pause", () => {
+    setup(1, true, true);
+    expect(
+      screen.getByRole("button", { name: "Reprendre le défilement automatique" }),
+    ).toBeTruthy();
   });
 
   it("ne remplit que le point actif (● ○ ○)", () => {
@@ -43,7 +69,7 @@ describe("CarouselControls", () => {
 
   it("change de diapositive avec les flèches, les points et les flèches du clavier", async () => {
     const user = userEvent.setup();
-    const onSelect = setup();
+    const { onSelect } = setup();
     await user.click(screen.getByRole("button", { name: "Diapositive suivante" }));
     expect(onSelect).toHaveBeenLastCalledWith(2);
     await user.click(screen.getByRole("button", { name: "Diapositive précédente" }));
@@ -60,7 +86,7 @@ describe("CarouselControls", () => {
 
   it("ignore les autres touches", async () => {
     const user = userEvent.setup();
-    const onSelect = setup();
+    const { onSelect } = setup();
     screen.getByRole("button", { name: "Afficher Galaxy S26 Ultra" }).focus();
     await user.keyboard("{ArrowUp}");
     expect(onSelect).not.toHaveBeenCalled();

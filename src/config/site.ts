@@ -37,11 +37,7 @@ const plannedRoutes = {
   montres: "/boutique#montres",
   bracelets: "/boutique#bracelets",
   comparer: "/comparer",
-  /** Section « comparer » de l'accueil : cible de « Comparer » tant que /comparer n'existe pas. */
-  comparerAccueil: "/#comparer",
   aideAuChoix: "/aide-au-choix",
-  /** Section « aide au choix » de l'accueil (QuizTeaser), affichée avec /aide-au-choix (étape 5). */
-  aideAccueil: "/#aide",
   recherche: "/recherche",
   panier: "/panier",
   /** Commande simulée (étape 6) : tant qu'elle n'est pas livrée, le panier l'annonce sans lien. */
@@ -62,7 +58,7 @@ const plannedRoutes = {
 
 export type RouteKey = keyof typeof plannedRoutes;
 
-/** Routes livrées à ce jour (étape 3, puis lot 3 de la refonte). À compléter à chaque étape. */
+/** Routes livrées à ce jour (étape 3, puis lots suivants). À compléter à chaque étape. */
 const deliveredRoutes: ReadonlySet<RouteKey> = new Set<RouteKey>([
   "accueil",
   "boutique",
@@ -74,7 +70,8 @@ const deliveredRoutes: ReadonlySet<RouteKey> = new Set<RouteKey>([
   "ecouteurs",
   "montres",
   "bracelets",
-  "comparerAccueil",
+  "comparer",
+  "aideAuChoix",
   "mentionsLegales",
   "credits",
   "confidentialite",
@@ -82,6 +79,10 @@ const deliveredRoutes: ReadonlySet<RouteKey> = new Set<RouteKey>([
   "livraison",
   "garantie",
   "panier",
+  "commande",
+  "suivi",
+  "recherche",
+  "compte",
 ]);
 
 /** Chemin de la route si elle est livrée, sinon `null` (le lien doit alors être masqué). */
@@ -151,6 +152,7 @@ const brandLinks = [
 ] as const satisfies ReadonlyArray<LinkSpec>;
 
 const helpLinks = [
+  { label: "Suivi de commande", route: "suivi" },
   { label: "Livraison et retours", route: "livraison" },
   { label: "Garantie", route: "garantie" },
   { label: "FAQ", route: "faq" },
@@ -232,12 +234,14 @@ export const footerColumns: NavGroup[] = deliveredGroups([
 ]);
 
 /**
- * Adresses de la navigation principale. Le pied de page ne marque pas ces liens comme « page
+ * Adresses des liens prioritaires de l'en-tête. Le pied de page ne les marque pas comme « page
  * courante » : l'en-tête (ou le menu mobile) le fait déjà, et une page n'en expose qu'un.
  */
-export const mainNavHrefs: ReadonlySet<string> = new Set(
-  mainNav.flatMap((group) => group.links.map((link) => link.href)),
-);
+const catalogHref = routeFor("boutique");
+export const mainNavHrefs: ReadonlySet<string> = new Set([
+  ...mainNav.flatMap((group) => group.links.map((link) => link.href)),
+  ...(catalogHref ? [catalogHref] : []),
+]);
 
 /** Liens légaux du bas de page (ajout à la maquette, voir docs/ecarts-maquette.md). */
 export const legalLinks: NavLink[] = deliveredLinks([

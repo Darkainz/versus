@@ -29,7 +29,7 @@ export function RadioPills({
   defaultValue: string;
   /**
    * Une seule ligne (le parent fait défiler) plutôt qu'un retour à la ligne ; sous 641 px, les
-   * pastilles sont plus serrées pour que quatre tiennent entières dès 360 px.
+   * pastilles sont plus serrées pour que quatre tiennent entières dès 360 px, même avec les polices plus larges de Linux (marge de 5 px mesurée).
    */
   nowrap?: boolean;
 }) {
@@ -43,7 +43,7 @@ export function RadioPills({
           key={option.value}
           className={clsx(
             "relative inline-flex h-11 items-center rounded-full border text-sm font-medium whitespace-nowrap transition-colors",
-            nowrap ? "px-3.5 sm:px-5" : "px-5",
+            nowrap ? "px-3 sm:px-5" : "px-5",
             "border-line-control bg-bg text-ink state-hover:border-ink",
             "has-checked:border-ink has-checked:bg-ink has-checked:text-on-dark",
             "has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-(--focus-ring)",

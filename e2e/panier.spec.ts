@@ -9,17 +9,30 @@ import { CART_STORAGE_KEY } from "../src/lib/cart/storage";
 
 /**
  * Panier (PLAN §6, étape 5) sur le catalogue statique : choix de la variante et ajout depuis la
- * fiche, compteur, tiroir, page panier. Le serveur fait foi : prix, stock et frais viennent du
- * devis (`priceCart`). Aucune commande ni aucun paiement.
+ * fiche, compteur, tiroir et page panier. Le serveur fait foi : prix, stock et frais viennent du
+ * devis (`priceCart`). Le parcours de commande est vérifié dans `commande.spec.ts`.
  */
 const plain = (text: string | null) => (text ?? "").replace(/[  ]/g, " ").trim();
 
-async function seed(page: Page, lines: unknown[], zone: string | null = null) {
+/**
+ * Écrit un panier dans le stockage local. Par défaut la page est rechargée pour que l'îlot du
+ * panier relise (et répare) le stockage ; `reload: false` laisse la lecture à la page ouverte
+ * ensuite, qui affiche alors l'avertissement de réparation (la première lecture réécrit un
+ * stockage sain : l'avertissement n'est visible que sur la page qui fait cette lecture).
+ */
+async function seed(
+  page: Page,
+  lines: unknown[],
+  zone: string | null = null,
+  { reload = true }: { reload?: boolean } = {},
+) {
   await page.goto("/mentions-legales");
+  await expect(page.getByRole("button", { name: "Panier" })).toBeVisible();
   await page.evaluate(([key, value]) => window.localStorage.setItem(key, value), [
     CART_STORAGE_KEY,
     JSON.stringify({ version: 1, lines, zone }),
   ] as const);
+  if (reload) await page.reload();
 }
 
 async function expectTotals(page: Page) {
@@ -77,10 +90,15 @@ test.describe("fiche produit : variante et ajout", () => {
 
 test.describe("page panier", () => {
   test("ignore un prix falsifié et un SKU mal formé : le serveur fait foi", async ({ page }) => {
-    await seed(page, [
-      { sku: "AP5-BLA", qty: 1, price_fcfa: 1 },
-      { sku: "bad sku", qty: 1 },
-    ]);
+    await seed(
+      page,
+      [
+        { sku: "AP5-BLA", qty: 1, price_fcfa: 1 },
+        { sku: "bad sku", qty: 1 },
+      ],
+      null,
+      { reload: false },
+    );
     await page.goto("/panier");
     await expect(page.getByText(/Une partie du panier enregistré était illisible/)).toBeVisible();
     await expect(page.locator("[data-sku]")).toHaveCount(1);
@@ -155,11 +173,13 @@ test.describe("page panier", () => {
     await expect(header.getByRole("button", { name: /^Panier/ })).toHaveCount(0);
   });
 
-  test("n'offre ni commande ni paiement : la commande simulée arrive bientôt", async ({ page }) => {
+  test("propose le tunnel de commande simulée livré à l'étape 6", async ({ page }) => {
     await seed(page, [{ sku: "AP5-BLA", qty: 1 }]);
     await page.goto("/panier");
-    await expect(page.getByText("La commande simulée arrive bientôt.")).toBeVisible();
-    await expect(page.getByRole("link", { name: /Commander/ })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Commander" })).toHaveAttribute(
+      "href",
+      "/commande",
+    );
     await expect(page.getByRole("button", { name: /Commander|Payer/ })).toHaveCount(0);
   });
 
@@ -231,12 +251,12 @@ test.describe("tiroir mini-panier", () => {
 
     await page.keyboard.press("Escape");
     await expect(dialog).toBeHidden();
-    await expect(page.getByRole("button", { name: "Panier" })).toBeFocused();
+    await expect(page.getByRole("button", { name: "Panier", exact: true })).toBeFocused();
   });
 
   test("vide dès l'ouverture : état vide, sans « … » sans fin", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("button", { name: "Panier" }).click();
+    await page.getByRole("button", { name: "Panier", exact: true }).click();
     const dialog = page.getByRole("dialog", { name: "Votre panier" });
     await expect(dialog.getByText("Votre panier est vide.")).toBeVisible();
     await expect(dialog.getByText("…")).toHaveCount(0);

@@ -16,7 +16,10 @@ type CommonProps = {
   className?: string;
 };
 
-type IconLinkProps = CommonProps & { href: string };
+type IconLinkProps = CommonProps & {
+  href: string;
+  prefetch?: ComponentProps<typeof Link>["prefetch"];
+};
 type IconNativeButtonProps = CommonProps &
   Omit<ComponentProps<"button">, "className" | "children" | "aria-label"> & {
     href?: undefined;
@@ -31,11 +34,16 @@ export type IconButtonProps = IconLinkProps | IconNativeButtonProps;
  */
 export function IconButton(props: IconButtonProps) {
   if (props.href !== undefined) {
-    const { label, icon, count, countUnits, className, href } = props;
+    const { label, icon, count, countUnits, className, href, prefetch } = props;
     const name = countLabel(label, count, countUnits);
     return (
       <>
-        <Link href={href} aria-label={name} className={clsx(classes, className)}>
+        <Link
+          href={href}
+          prefetch={prefetch}
+          aria-label={name}
+          className={clsx(classes, className)}
+        >
           <Icon name={icon} />
           <Badge count={count} />
         </Link>

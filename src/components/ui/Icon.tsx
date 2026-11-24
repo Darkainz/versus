@@ -28,6 +28,8 @@ const paths = {
   ),
   menu: <path d="M4 8h16M4 16h16" />,
   close: <path d="M6 6l12 12M18 6L6 18" />,
+  play: <path d="M8 5v14l11-7z" />,
+  pause: <path d="M8 5v14M16 5v14" />,
   smartphone: (
     <>
       <rect x="7" y="2.5" width="10" height="19" rx="2.5" />

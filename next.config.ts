@@ -1,9 +1,24 @@
 import type { NextConfig } from "next";
 
+let remotePatterns: URL[] = [];
+let dangerouslyAllowLocalIP = false;
+if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  try {
+    const supabaseUrl = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL);
+    remotePatterns = [new URL(`${supabaseUrl.origin}/storage/v1/object/public/product-images/**`)];
+    dangerouslyAllowLocalIP =
+      supabaseUrl.hostname === "127.0.0.1" || supabaseUrl.hostname === "localhost";
+  } catch {
+    remotePatterns = [];
+  }
+}
+
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   images: {
+    remotePatterns,
+    dangerouslyAllowLocalIP,
     // AVIF d'abord, WebP sinon (refonte, lot 1) : l'optimiseur choisit selon l'en-tête Accept,
     // le PNG source reste servi aux navigateurs qui n'acceptent ni l'un ni l'autre.
     formats: ["image/avif", "image/webp"],
