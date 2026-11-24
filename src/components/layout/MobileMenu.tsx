@@ -6,7 +6,7 @@ import { MobileMenuDialog } from "./MobileMenuDialog";
 import { NavLink } from "./NavLink";
 
 /**
- * Menu mobile (≤ 900 px). La maquette n'avait aucune navigation mobile : c'est une correction
+ * Menu mobile (≤ 1239 px). La maquette n'avait aucune navigation mobile : c'est une correction
  * UX (voir docs/ecarts-maquette.md). Composant serveur : il rend le contenu du menu et le confie
  * à l'îlot client `MobileMenuDialog`, qui ne gère que l'ouverture (budget JavaScript, §7.1).
  */

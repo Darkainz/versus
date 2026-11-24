@@ -190,7 +190,7 @@ export const mainNavPreview: ReadonlyArray<{ label: string; items: string[] }> =
   (group) => ({ label: group.label, items: group.links.map((link) => link.label) }),
 );
 
-/** Menu mobile (≤ 900 px) : la navigation principale, puis l'aide. */
+/** Menu mobile (≤ 1239 px) : la navigation principale, puis l'aide. */
 export const mobileNav: NavGroup[] = deliveredGroups([
   ...mainNavSpec,
   { label: "Aide", links: helpLinks },
