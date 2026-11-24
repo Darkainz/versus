@@ -882,6 +882,17 @@ const brandNames: Record<Brand, string> = {
   xiaomi: "Xiaomi",
 };
 
+/**
+ * Capacité de la configuration unique des modèles ajoutés (indicative, comme leur prix). La base
+ * exige un stockage pour tout smartphone (déclencheur `variants_check_attributes`) et l'interdit
+ * aux écouteurs et bracelets ; montres et autres accessoires n'en portent pas ici. Les modèles
+ * haut de gamme (Pro Max, Ultra, pliants) et Xiaomi sont en 256 Go, les autres en 128 Go.
+ */
+function baseStorage(candidate: Candidate): number | null {
+  if (candidate.category !== "smartphones") return null;
+  return candidate.brand === "xiaomi" || /Pro Max|Ultra|Fold|Flip/.test(candidate.name) ? 256 : 128;
+}
+
 export const additionalProducts: readonly ProductDetail[] = candidates.map((candidate, index) => {
   const slug = slugify(candidate.name);
   const code = productCode(candidate.name);
@@ -937,7 +948,7 @@ export const additionalProducts: readonly ProductDetail[] = candidates.map((cand
         color_name: "Coloris indicatif",
         color_slug: "indicatif",
         color_hex: null,
-        storage_gb: null,
+        storage_gb: baseStorage(candidate),
         size_mm: null,
         price_fcfa: candidate.price,
         stock: 18,
