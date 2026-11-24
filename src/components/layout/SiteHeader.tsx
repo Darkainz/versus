@@ -19,12 +19,14 @@ const shopHref = routeFor("boutique");
 
 /**
  * En-tête du site (maquette : `.hdr`), landmark `banner` de premier niveau.
- * - collant, 56 px ; translucide et flouté à partir de 901 px, opaque en dessous (écart :
+ * - collant, 56 px ; translucide et flouté à partir de 901 px, opaque en dessous (le seuil de la navigation est à part : 1240 px) (écart :
  *   lisibilité et coût du flou sur mobile, voir docs/ecarts-maquette.md) ;
  * - navigation, icônes et menu mobile pilotés par config/site.ts : un élément dont la route
  *   n'est pas livrée est absent du DOM (à l'étape 2 : toutes les icônes et toute la navigation
  *   principale).
- * - lien « Tout le catalogue » à droite (refonte §3.5), masqué sur mobile.
+ * - lien « Tout le catalogue » à droite (refonte §3.5), seulement à partir de 1290 px : avec la
+ *   navigation, les icônes et le logo, il faut 1 204 px de contenu, et la zone en offre 1 240 au plus ;
+ * - navigation principale à partir de 1240 px (xl), menu mobile en dessous.
  */
 export function SiteHeader() {
   return (
@@ -35,7 +37,7 @@ export function SiteHeader() {
         {shopHref ? (
           <NavLink
             href={shopHref}
-            className="hidden text-[13.5px] font-medium text-ink opacity-80 transition-opacity aria-[current=page]:opacity-100 md:block state-hover:opacity-100"
+            className="hidden text-[13.5px] font-medium whitespace-nowrap text-ink opacity-80 transition-opacity aria-[current=page]:opacity-100 min-[1290px]:block state-hover:opacity-100"
           >
             Tout le catalogue
           </NavLink>

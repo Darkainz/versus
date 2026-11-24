@@ -13,8 +13,8 @@ import {
 } from "react";
 import { iconButtonClasses } from "@/components/ui/icon-button-styles";
 
-/** Le menu mobile n'existe que sous ce seuil (maquette : `.nav { display: none }` ≤ 900 px). */
-const DESKTOP_QUERY = "(min-width: 901px)";
+/** Le menu mobile n'existe que sous ce seuil : la navigation de bureau (neuf liens) demande 1 240 px. */
+const DESKTOP_QUERY = "(min-width: 1240px)";
 
 const MenuDialog = lazy(() =>
   import("./MobileMenuDialogContent").then((module) => ({
@@ -73,7 +73,7 @@ export function MobileMenuDialog({
   const close = () => setOpen(false);
 
   return (
-    <div className="md:hidden">
+    <div className="xl:hidden">
       <button
         ref={buttonRef}
         type="button"

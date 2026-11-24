@@ -736,6 +736,9 @@
     align-items: center;
     gap: 18px;
     margin: 0 auto;
+    /* Largeur explicite : avec des marges automatiques, la colonne flex de <main> ne l'étire plus et
+       la somme des puces (787 px) élargissait la page à 768 px. */
+    width: 100%;
     max-width: 1320px;
     overflow: hidden;
     padding: 24px 24px 8px;
