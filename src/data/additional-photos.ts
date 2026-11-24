@@ -45,6 +45,12 @@ export const additionalPhotos: Readonly<Record<string, ProductPhoto>> = {
   iphone14plus: { width: 658, height: 875, alt: "iPhone 14 Plus bleu, vues de dos et de face" },
   iphone13pro: { width: 721, height: 900, alt: "iPhone 13 Pro bleu alpin, vues de dos et de face" },
   i13pmax: { width: 698, height: 900, alt: "iPhone 13 Pro Max bleu alpin, vues de dos et de face" },
+  iphone12pro: {
+    width: 556,
+    height: 760,
+    alt: "iPhone 12 Pro bleu pacifique, vues de dos et de face",
+  },
+  i12pmax: { width: 507, height: 693, alt: "iPhone 12 Pro Max argent, vues de dos et de face" },
   iphone13: { width: 667, height: 887, alt: "iPhone 13 bleu, vues de dos et de face" },
   iphone13mini: { width: 609, height: 792, alt: "iPhone 13 mini bleu, vues de dos et de face" },
   airpods4: { width: 621, height: 880, alt: "AirPods 4 blancs avec leur boîtier de charge ouvert" },

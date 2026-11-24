@@ -11,13 +11,22 @@ export type ProductVisualSource = {
   label: string;
   brand: Brand;
   /** Site officiel d'où vient le visuel. */
-  site: "apple.com" | "samsung.com" | "mi.com";
+  site: "apple.com" | "samsung.com" | "mi.com" | "fourni par le projet";
   /** Date de téléchargement (AAAA-MM-JJ). */
   downloaded: string;
 };
 
 const apple = (code: string, label: string, downloaded = "2026-11-17") =>
   ({ code, label, brand: "apple", site: "apple.com", downloaded }) as const;
+/** Visuel Apple remis par l'auteur du projet (origine exacte non vérifiée, voir SOURCES.md). */
+const fourni = (code: string, label: string) =>
+  ({
+    code,
+    label,
+    brand: "apple",
+    site: "fourni par le projet",
+    downloaded: "2026-11-24",
+  }) as const;
 const samsung = (code: string, label: string, downloaded = "2026-11-17") =>
   ({ code, label, brand: "samsung", site: "samsung.com", downloaded }) as const;
 const xiaomi = (code: string, label: string, downloaded = "2026-11-17") =>
@@ -68,6 +77,8 @@ export const productVisualSources: readonly ProductVisualSource[] = [
   apple("iphone14plus", "iPhone 14 Plus (bleu)", "2026-11-23"),
   apple("iphone13pro", "iPhone 13 Pro (bleu alpin)", "2026-11-23"),
   apple("i13pmax", "iPhone 13 Pro Max (bleu alpin)", "2026-11-23"),
+  fourni("iphone12pro", "iPhone 12 Pro (bleu pacifique)"),
+  fourni("i12pmax", "iPhone 12 Pro Max (argent)"),
   apple("iphone13", "iPhone 13 (bleu)", "2026-11-23"),
   apple("iphone13mini", "iPhone 13 mini (bleu)", "2026-11-23"),
   apple("airpods4", "AirPods 4 (blanc)", "2026-11-23"),

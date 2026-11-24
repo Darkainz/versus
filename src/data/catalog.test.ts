@@ -91,10 +91,7 @@ describe("catalogue de démonstration", () => {
     const codes = new Set(additionalProducts.map((product) => product.code));
     for (const code of Object.keys(additionalPhotos)) expect(codes.has(code), code).toBe(true);
     const withoutPhoto = additionalProducts.filter((product) => !additionalPhotos[product.code]);
-    expect(withoutPhoto.map((product) => product.code).toSorted()).toEqual([
-      "i12pmax",
-      "iphone12pro",
-    ]);
+    expect(withoutPhoto.map((product) => product.code).toSorted()).toEqual([]);
     for (const product of withoutPhoto) expect(product.image_src, product.code).toBeNull();
   });
 
