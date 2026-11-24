@@ -19,6 +19,14 @@ référence par la plateforme :
 
 - `e2e/visuel.spec.ts-snapshots/accueil-1440-chromium-win32.png`
 - `e2e/visuel.spec.ts-snapshots/accueil-390-chromium-win32.png`
+- `e2e/visuel.spec.ts-snapshots/accueil-1440-chromium-linux.png`
+- `e2e/visuel.spec.ts-snapshots/accueil-390-chromium-linux.png`
+
+Les références Linux ont été générées le 24 novembre 2026 avec l'image Docker de Playwright 1.65.0
+(`mcr.microsoft.com/playwright:v1.65.0-noble`, `CI=1`, procédure ci-dessous), à partir de l'accueil
+tel qu'il est en production (103 produits, en-tête de bureau corrigé), puis vérifiées par un
+second rendu dans un conteneur neuf. La CI Linux compare donc désormais l'accueil au lieu d'ignorer
+ce test.
 
 Les références Windows ont été prises le 17 novembre 2026, à la fin de l'étape 3, puis régénérées
 le même jour au lot 1 de la refonte (`--update-snapshots=changed`) : visuels recadrés avec une marge
